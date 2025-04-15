@@ -1,0 +1,508 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Togetherly - Professional Network</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'users/base.css' %}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-left">
+            <div class="logo">
+                <div class="logo-icon">
+                    <div class="logo-circle"></div>
+                    <div class="logo-circle"></div>
+                    <div class="logo-circle"></div>
+                </div>
+                <span class="logo-text">Togetherly</span>
+            </div>
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="Search...">
+                    <button class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-buttons">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <a class="btn btn-outline" id="join-btn" href="{% url 'login' %}" style="text-decoration: none;">Join Now</a>
+            <a class="btn btn-primary" id="signin-btn" href="{% url 'signup' %}" style="text-decoration: none;">Sign Up</a>
+        </div>
+    </nav>
+
+    <div class="main-content" style="background-color: rgba(128, 128, 128, 0.099);max-width: 100vw; ">
+        <div class="hero-section" >
+            <div class="hero-text">
+                <h1>Welcome to your professional community</h1>
+                <p>Connect, share, and grow with professionals from around the world with Togetherly.</p>
+                <div class="action-buttons">
+                    <a class="btn btn-primary" href="{% url 'login' %}" style="text-decoration: none;">Get Started</a>
+                    <button class="btn btn-outline">Learn More</button>
+                </div>
+                <div class="joined-users">
+                    <div class="user-avatars">
+                        <div class="user-avatar"><img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User"></div>
+                        <div class="user-avatar"><img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User"></div>
+                        <div class="user-avatar"><img src="https://randomuser.me/api/portraits/men/22.jpg" alt="User"></div>
+                        <div class="user-avatar"><img src="https://randomuser.me/api/portraits/women/29.jpg" alt="User"></div>
+                    </div>
+                    <span class="joined-text">Join 10M+ professionals on Togetherly</span>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Professional networking">
+            </div>
+        </div>
+    </div>
+
+    <!-- Professionals Section with Card Flip -->
+    <div class="main-content" >
+        <h2 class="section-title">Find and connect with professionals</h2>
+        <div class="cards-container">
+            <!-- Card 1 -->
+            <div class="profile-card">
+                <div class="card-inner">
+                    <!-- Front of card -->
+                    <div class="card-front">
+                        <div class="card-header card-header-1"></div>
+                        <div class="profile-image">
+                            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Sarah Johnson">
+                        </div>
+                        <div class="profile-info">
+                            <h3 class="profile-name">Sarah Johnson</h3>
+                            <p class="profile-title">Product Manager</p>
+                            <p class="profile-company">TechVision Inc.</p>
+                            <div class="profile-location">
+                                <span>📍</span> San Francisco, CA
+                            </div>
+                            <p class="connections">732 connections</p>
+                        </div>
+                        <div class="card-actions">
+                            <a href="connections.html" class="card-btn card-btn-primary" onclick="event.stopPropagation()">
+                                <span>👥</span> Connect
+                            </a>
+                            <a href="messaging.html" class="card-btn card-btn-outline" onclick="event.stopPropagation()">
+                                <span>💬</span> Message
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Back of card -->
+                    <div class="card-back">
+                        <h3 class="about-title">About Sarah</h3>
+                        <div class="info-item">
+                            <div class="info-icon">💼</div>
+                            <div class="info-content">
+                                <p class="info-label">Work</p>
+                                <p class="info-value">Product Manager at TechVision Inc.</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon">🎓</div>
+                            <div class="info-content">
+                                <p class="info-label">Education</p>
+                                <p class="info-value">MBA, Stanford University</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon">📍</div>
+                            <div class="info-content">
+                                <p class="info-label">Location</p>
+                                <p class="info-value">San Francisco, CA</p>
+                            </div>
+                        </div>
+                        <div class="skills-section">
+                            <h4 class="skills-title">Skills & Endorsements</h4>
+                            <div class="skills-container">
+                                <span class="skill-tag">Product Strategy</span>
+                                <span class="skill-tag">UX Design</span>
+                                <span class="skill-tag">Agile</span>
+                                <span class="skill-tag">Leadership</span>
+                                <span class="skill-tag">Market Research</span>
+                            </div>
+                        </div>
+                        <p class="flip-hint">Click card to flip back</p>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Card 2 -->
+            <div class="profile-card">
+                <div class="card-inner">
+                    <!-- Front of card -->
+                    <div class="card-front">
+                        <div class="card-header card-header-2"></div>
+                        <div class="profile-image">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="David Miller">
+                        </div>
+                        <div class="profile-info">
+                            <h3 class="profile-name">David Miller</h3>
+                            <p class="profile-title">Marketing Director</p>
+                            <p class="profile-company">GlobalBrand</p>
+                            <div class="profile-location">
+                                <span>📍</span> San Francisco, CA
+                            </div>
+                            <p class="connections">842 connections</p>
+                        </div>
+                        <div class="card-actions">
+                            <a href="connections.html" class="card-btn card-btn-primary" onclick="event.stopPropagation()">
+                                <span>👥</span> Connect
+                            </a>
+                            <a href="messaging.html" class="card-btn card-btn-outline" onclick="event.stopPropagation()">
+                                <span>💬</span> Message
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Back of card -->
+                    <div class="card-back">
+                        <h3 class="about-title">About David</h3>
+                        <div class="info-item">
+                            <div class="info-icon">💼</div>
+                            <div class="info-content">
+                                <p class="info-label">Work</p>
+                                <p class="info-value">Marketing Director at GlobalBrand</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon">🎓</div>
+                            <div class="info-content">
+                                <p class="info-label">Education</p>
+                                <p class="info-value">Stanford University</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon">📍</div>
+                            <div class="info-content">
+                                <p class="info-label">Location</p>
+                                <p class="info-value">San Francisco, CA</p>
+                            </div>
+                        </div>
+                        <div class="skills-section">
+                            <h4 class="skills-title">Skills & Endorsements</h4>
+                            <div class="skills-container">
+                                <span class="skill-tag">Leadership</span>
+                                <span class="skill-tag">Strategic Planning</span>
+                                <span class="skill-tag">Marketing</span>
+                                <span class="skill-tag">Product Development</span>
+                            </div>
+                        </div>
+                        <p class="flip-hint">Click card to flip back</p>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Card 3 -->
+            <div class="profile-card">
+                <div class="card-inner">
+                    <!-- Front of card -->
+                    <div class="card-front">
+                        <div class="card-header card-header-3"></div>
+                        <div class="profile-image">
+                            <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Michael Chen">
+                        </div>
+                        <div class="profile-info">
+                            <h3 class="profile-name">Michael Chen</h3>
+                            <p class="profile-title">Software Engineer</p>
+                            <p class="profile-company">TechGrow</p>
+                            <div class="profile-location">
+                                <span>📍</span> Seattle, WA
+                            </div>
+                            <p class="connections">519 connections</p>
+                        </div>
+                        <div class="card-actions">
+                            <a href="connections.html" class="card-btn card-btn-primary" onclick="event.stopPropagation()">
+                                <span>👥</span> Connect
+                            </a>
+                            <a href="messaging.html" class="card-btn card-btn-outline" onclick="event.stopPropagation()">
+                                <span>💬</span> Message
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Back of card -->
+                    <div class="card-back">
+                        <h3 class="about-title">About Michael</h3>
+                        <div class="info-item">
+                            <div class="info-icon">💼</div>
+                            <div class="info-content">
+                                <p class="info-label">Work</p>
+                                <p class="info-value">Software Engineer at TechGrow</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon">🎓</div>
+                            <div class="info-content">
+                                <p class="info-label">Education</p>
+                                <p class="info-value">University of Washington</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon">📍</div>
+                            <div class="info-content">
+                                <p class="info-label">Location</p>
+                                <p class="info-value">Seattle, WA</p>
+                            </div>
+                        </div>
+                        <div class="skills-section">
+                            <h4 class="skills-title">Skills & Endorsements</h4>
+                            <div class="skills-container">
+                                <span class="skill-tag">JavaScript</span>
+                                <span class="skill-tag">React</span>
+                                <span class="skill-tag">Node.js</span>
+                                <span class="skill-tag">AWS</span>
+                                <span class="skill-tag">Python</span>
+                            </div>
+                        </div>
+                        <p class="flip-hint">Click card to flip back</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Feed Section based on screenshots -->
+    <div class="main-content" style="background-color: rgba(128, 128, 128, 0.099);max-width: 100vw;">
+        <div class="flex-container" >
+            <div class="feed-section">
+                <h2 class="section-title">Latest in your network</h2>
+                
+                <!-- Post 1 -->
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-author">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Alex Chen" class="author-avatar">
+                            <div class="author-info">
+                                <h3 class="author-name">Alex Chen</h3>
+                                <p class="author-title">Software Engineer at CodeCraft</p>
+                                <p class="post-time">6h ago</p>
+                            </div>
+                        </div>
+                        <div class="post-options">
+                            <span>•••</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <p>Just finished building our new feature using React and TypeScript. The type safety really does make a difference in large codebases! #webdevelopment #typescript</p>
+                        <div class="post-image">
+                            <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97" alt="Coding on laptop">
+                        </div>
+                    </div>
+                    <div class="post-actions">
+                        <div class="action-button">
+                            <span>👍</span> 47 Likes
+                        </div>
+                        <div class="action-button">
+                            <span>💬</span> 8 Comments
+                        </div>
+                        <div class="action-button">
+                            <span>🔄</span> 3 Shares
+                        </div>
+                        <div class="action-button">
+                            <span>📤</span> Send
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Post 2 -->
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-author">
+                            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Maya Patel" class="author-avatar">
+                            <div class="author-info">
+                                <h3 class="author-name">Maya Patel</h3>
+                                <p class="author-title">Marketing Director at BrandBoost</p>
+                                <p class="post-time">1d ago</p>
+                            </div>
+                        </div>
+                        <div class="post-options">
+                            <span>•••</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <p>Excited to announce our company's rebrand! After months of work, we've refreshed our visual identity to better reflect our mission and values. What do you think?</p>
+                    </div>
+                    <div class="post-actions">
+                        <div class="action-button">
+                            <span>👍</span> 124 Likes
+                        </div>
+                        <div class="action-button">
+                            <span>💬</span> 23 Comments
+                        </div>
+                        <div class="action-button">
+                            <span>🔄</span> 16 Shares
+                        </div>
+                        <div class="action-button">
+                            <span>📤</span> Send
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Post 3 -->
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-author">
+                            <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="John Davis" class="author-avatar">
+                            <div class="author-info">
+                                <h3 class="author-name">John Davis</h3>
+                                <p class="author-title">Product Designer at DesignLab</p>
+                                <p class="post-time">1d ago</p>
+                            </div>
+                        </div>
+                        <div class="post-options">
+                            <span>•••</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <p>Just published my case study on our latest UX redesign project. We improved conversion rates by 32% by focusing on these three key areas of the user journey...</p>
+                        <div class="post-image">
+                            <img src="https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e" alt="UX Design Sketch">
+                        </div>
+                    </div>
+                    <div class="post-actions">
+                        <div class="action-button">
+                            <span>👍</span> 86 Likes
+                        </div>
+                        <div class="action-button">
+                            <span>💬</span> 12 Comments
+                        </div>
+                        <div class="action-button">
+                            <span>🔄</span> 7 Shares
+                        </div>
+                        <div class="action-button">
+                            <span>📤</span> Send
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Section based on screenshots -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <h2>Togetherly</h2>
+                <p>Connect, Share, Grow</p>
+            </div>
+            
+            <div class="footer-links">
+                <a href="#">About</a>
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Help Center</a>
+            </div>
+            
+            <div class="footer-copyright">
+                <p>© 2023 Togetherly. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // theme toggle
+            const themeToggle = document.getElementById('themeToggle');
+            // Function to toggle theme and save preference
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    document.body.classList.toggle('dark-mode');
+                    // Save the current theme preference in localStorage
+                    const currentTheme = document.body.classList.contains('dark-mode') ? 'dark-mode' : 'light-mode';
+                    localStorage.setItem('theme', currentTheme);
+                });
+            }
+            // Function to apply the saved theme on page load
+            function applySavedTheme() {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'dark-mode') {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            }
+            applySavedTheme();
+            
+            // Add animation to buttons
+            const buttons = document.querySelectorAll('.btn, .card-btn');
+            buttons.forEach(button => {
+                button.addEventListener('mousedown', function() {
+                    this.style.transform = 'scale(0.98)';
+                });
+                button.addEventListener('mouseup', function() {
+                    this.style.transform = 'scale(1)';
+                });
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+
+            // Auth tabs functionality
+            const authTabs = document.querySelectorAll('.auth-tab');
+            const authForms = document.querySelectorAll('.auth-form');
+            
+            authTabs.forEach((tab, index) => {
+                tab.addEventListener('click', function() {
+                    // Update active tab
+                    authTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show corresponding form
+                    authForms.forEach(form => form.classList.remove('active'));
+                    authForms[index].classList.add('active');
+                });
+            });
+
+            // Card hover to flip
+            const profileCards = document.querySelectorAll('.profile-card');
+            profileCards.forEach(card => {
+                // Add hover event listeners
+                card.addEventListener('mouseenter', function(e) {
+                    const cardInner = this.querySelector('.card-inner');
+                    cardInner.style.transform = 'rotateY(180deg)';
+                });
+                
+                card.addEventListener('mouseleave', function(e) {
+                    const cardInner = this.querySelector('.card-inner');
+                    cardInner.style.transform = 'rotateY(0deg)';
+                });
+                
+                // Keep click functionality for mobile devices
+                card.addEventListener('click', function(e) {
+                    // Don't flip if clicking on buttons or links
+                    if (e.target.closest('.card-btn') || e.target.closest('a')) {
+                        return;
+                    }
+                    
+                    const cardInner = this.querySelector('.card-inner');
+                    cardInner.style.transform = 
+                        cardInner.style.transform === 'rotateY(180deg)' ? 
+                        'rotateY(0deg)' : 'rotateY(180deg)';
+                });
+            });
+            
+            // Like button functionality
+            const likeButtons = document.querySelectorAll('.like-button');
+            likeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    this.classList.toggle('liked');
+                    const svg = this.querySelector('svg');
+                    if (this.classList.contains('liked')) {
+                        svg.style.fill = '#ffc107'; // Yellow color when liked
+                    } else {
+                        svg.style.fill = 'currentColor'; // Default color
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

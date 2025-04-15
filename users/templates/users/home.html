@@ -1,0 +1,200 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Togetherly</title>
+    <link rel="stylesheet" href="{% static 'users/home.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <div class="logo-icon">
+                <div class="logo-circle"></div>
+                <div class="logo-circle"></div>
+                <div class="logo-circle"></div>
+            </div>
+            <span class="logo-text">Togetherly</span>
+        </div>
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="Search...">
+                <button class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+        <div class="nav-links">
+                <div class="nav-item">
+                    <a href="#"><i class="fas fa-home"></i> Home</a>
+                </div>
+                
+            <div class="nav-item">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="main-content">
+        <!-- Left Sidebar -->
+        <div class="profile-section">
+            <div class="profile-card">
+                <div class="profile-cover"></div>
+                <div class="profile-info">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h2 class="profile-name">
+                        Kashish
+                    </h2>
+                    <p class="profile-headline"></p>
+                    <div class="mood-indicator">
+                        <span class="mood-emoji">😊</span>
+                        <span>Feeling productive today!</span>
+                    </div>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span>Profile views</span>
+                        <span>0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Post impressions</span>
+                        <span>0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Feed -->
+        <div class="feed-section">
+            <!-- Post Section -->
+            <div class="create-post">
+                <input type="hidden" id="createPostUrl" value="">
+                <input type="hidden" id="getPostsUrl" value="">
+                <input type="hidden" id="currentUserId" value=""> 
+                <div class="post-input">
+                    <div class="post-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="post-textbox">
+                        <input type="text" id="postContent" placeholder="Share what you're working on...">
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <div class="post-action">
+                        <i class="fas fa-image"></i>
+                        <label for="postImage">Photo</label>
+                        <input type="file" id="postImage" style="visibility: hidden;">
+                    </div>
+                    <div class="post-action">📅 Event</div>
+                    <div class="post-action">📝 Write Article</div>
+                    <button class="post-action" id="submitPost">Post</button> 
+                </div>
+            </div>
+            
+            <!-- Posts Feed -->
+            <div class="posts-feed" id="postsFeed">
+                <div id="loading" style="display: none;">Loading posts...</div>
+                <!-- Example Post Card  -->
+                <div class="post">
+                    <div class="post-header">
+                        <div class="post-user">
+                            <span class="post-username">Username</span>
+                            <div class="post-timestamp">
+                                <span class="post-date">Date</span>
+                                <span class="post-time">Time</span>
+                            </div>
+                        </div>
+                        <button class="delete-post" data-post-id="1">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="post-content">This is a sample post content.</div>
+                </div>
+            </div>
+
+
+            <!-- Trending section  -->
+            <div class="news-section">
+                <h2 class="news-header">Trending News</h2>
+                <div class="news-card">
+                    <div class="news-item">
+                        <div class="news-title">
+                            <a href="https://neontri.com/blog/claude-ai-breakthrough/#:~:text=After%20testing%20the%20models%20on,material%20to%20verify%20the%20answers.">
+                                Claude 3 Surpasses Human Performance on Advanced Reasoning Tasks
+                            </a>
+                        </div>
+                        <div class="news-meta">
+                            <i class="fas fa-fire"></i>
+                            <span>15.2K developers discussing</span>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <div class="news-title">
+                            <a href="https://searchengineland.com/google-imagen-3-ai-model-human-subjects-ads-452120">
+                                Google Introduces Next-Gen AI Image Generator
+                            </a>
+                        </div>
+                        <div class="news-meta">
+                            <i class="fas fa-chart-line"></i>
+                            <span>8.7K shares</span>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <div class="news-title">
+                            <a href="https://medium.com/@ilhnsevval/openais-latest-innovations-multimodal-capabilities-and-assistants-api-901a02cc344f">
+                                OpenAI's Latest Innovation in Multimodal Learning
+                            </a>
+                        </div>
+                        <div class="news-meta">
+                            <i class="fas fa-comments"></i>
+                            <span>12.3K reactions</span>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <div class="news-title">
+                            <a href="https://about.gitlab.com/topics/devops/ai-code-generation-guide/">
+                                AI-Powered Code Generation Transforms Developer Workflow
+                            </a>
+                        </div>
+                        <div class="news-meta">
+                            <i class="fas fa-code"></i>
+                            <span>6.5K developers implementing</span>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <div class="news-title">
+                            <a href="https://techcrunch.com/2025/02/20/ceo-of-clearview-ai-a-controversial-facial-recognition-startup-has-resigned/">
+                                CEO of Clearview AI, a controversial facial recognition startup, has resigned
+                            </a>
+                        </div>
+                        <div class="news-meta">
+                            <i class="fas fa-user-lock"></i>
+                            <span>Clearview AI faces multiple privacy suits</span>
+                        </div>
+                    </div>
+                    <div class="news-item">
+                        <div class="news-title">
+                            <a href="https://timesofindia.indiatimes.com/technology/tech-news/swedish-pm-has-an-ai-warning-for-europe-region-will-actually-become-some-kind-of/articleshow/118424150.cms">
+                                Swedish PM has an ‘AI warning’ for Europe: Region ‘will actually become some kind of…’
+                            </a>
+                        </div>
+                        <div class="news-meta">
+                            <i class="fas fa-globe"></i>
+                            <span>Europe urged to ease AI regulations</span>
+                        </div>
+                    </div>                
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{% static 'users/home.js' %}"></script>
+</body>
+</html>
