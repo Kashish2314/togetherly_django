@@ -19,9 +19,20 @@
             <span class="logo-text">Togetherly</span>
         </div>
         <div class="nav-links">
-            <button class="theme-toggle" id="themeToggle" >🌓</button>
+            <button class="theme-toggle" id="themeToggle">🌓</button>
         </div>
     </nav>
+
+    <!-- Django Messages -->
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
     <div class="container">
         <div class="profile-card">
@@ -34,17 +45,19 @@
                 </div>
                 <div class="profile-actions">
                     <button class="btn" id="editProfile">Edit profile</button>
-                    <button class="btn btn-danger" id="deleteAccount">Delete account</button>
+                    <form method="post" action="{% url 'delete_account' %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button class="btn btn-danger" type="submit" onclick="return confirm('Are you sure you want to delete your account? This cannot be undone.')">Delete account</button>
+                    </form>
                 </div>
                 <div class="profile-details">
-                    <h1 class="profile-name" id="displayName">kashish</h1>
-                    <div class="profile-headline" id="displayUsername">kash_2314</div>
-                    <div class="profile-location" id="displayEmail">kashishb195@gmail.com</div>
+                    <h1 class="profile-name">{{ user_profile.name|default:user.get_full_name|default:user.username }}</h1>
+                    <div class="profile-headline">{{ user_profile.username|default:user.username }}</div>
+                    <div class="profile-location">{{ user_profile.email|default:user.email }}</div>
                 </div>
             </div>
         </div>
 
-        
         <div class="stats-section">
             <div class="stat-card">
                 <div class="stat-number">0</div>
@@ -64,216 +77,109 @@
             </div>
         </div>
 
-        
-        <div class="bio-section" id="bioSection">
+        <div class="bio-section">
             <div class="bio-header">
                 <h3>About</h3>
             </div>
-            <div class="bio-content" id="bioContent">
-                
-                    No bio available.
-                
+            <div class="bio-content">
+                {{ user_profile.bio|default:"No bio available." }}
             </div>
         </div>
 
-        
-        <div class="skills-section" id="skillsSection">
+        <div class="skills-section">
             <h3>Skills</h3>
-            <div class="skills-container" id="skillsContainer">
-                
+            <div class="skills-container">
+                {% if skills %}
+                    {% for skill in skills %}
+                        <span class="skill-tag">{{ skill }}</span>
+                    {% endfor %}
+                {% else %}
                     <span class="skill-tag">No skills added.</span>
-                
+                {% endif %}
             </div>
-        </div> 
-
-
-        <!-- Activity Feed (Hidden by Default) -->
-        <div class="activity-feed" id="activitySection" style="display: none;">
-            <h3>Recent Activity</h3>
-            <div class="activity-items" id="activityItems"></div>
         </div>
-    </div>
 
-    <!-- Edit Profile Modal -->
-    <div class="modal" id="editProfileModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Edit Profile</h2>
-                <button class="close-modal" id="closeModal">&times;</button>
+        <!-- Edit Profile Modal (hidden by default, shown with JS) -->
+        <div class="modal" id="editProfileModal" style="display:none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Edit Profile</h2>
+                    <button class="close-modal" id="closeModal" type="button">&times;</button>
+                </div>
+                <form id="profileForm" method="post" action="{% url 'update_profile' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="editName">Name</label>
+                        <input type="text" id="editName" name="name" value="{{ user_profile.name }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="editUsername">Username</label>
+                        <input type="text" id="editUsername" name="username" value="{{ user_profile.username }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="editEmail">Email</label>
+                        <input type="email" id="editEmail" name="email" value="{{ user_profile.email }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="editBioText">Bio</label>
+                        <textarea id="editBioText" name="bio">{{ user_profile.bio }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="editSkills">Skills (comma-separated)</label>
+                        <input type="text" id="editSkills" name="skills" value="{{ user_profile.skills }}">
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn" id="cancelEdit" type="button">Cancel</button>
+                        <button class="btn" id="saveProfile" type="submit">Save Changes</button>
+                    </div>
+                </form>
             </div>
-            <form id="profileForm" action="" method="POST">
-                <div class="form-group">
-                    <label for="editName">Name</label>
-                    <input type="text" id="editName" name="name" value="">
-                </div>
-                <div class="form-group">
-                    <label for="editUsername">Username</label>
-                    <input type="text" id="editUsername" name="username" value="">
-                </div>
-                <div class="form-group">
-                    <label for="editEmail">Email</label>
-                    <input type="email" id="editEmail" name="email" value="">
-                </div>
-                <div class="form-group">
-                    <label for="editBioText">Bio</label>
-                    <textarea id="editBioText" name="bio"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="editSkills">Skills (comma-separated)</label>
-                    <input type="text" id="editSkills" name="skills" value="">
-                </div>
-                <div class="modal-footer">
-                    <button class="btn" id="cancelEdit" type="button">Cancel</button>
-                    <button class="btn" id="saveProfile" type="submit">Save Changes</button>
-                </div>
-            </form>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Theme toggle
-            const themeToggle = document.getElementById('themeToggle');
-            if (themeToggle) {
-                themeToggle.addEventListener('click', () => {
-                    document.body.classList.toggle('dark-mode');
-                    const currentTheme = document.body.classList.contains('dark-mode') ? 'dark-mode' : 'light-mode';
-                    localStorage.setItem('theme', currentTheme);
-                });
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                const currentTheme = document.body.classList.contains('dark-mode') ? 'dark-mode' : 'light-mode';
+                localStorage.setItem('theme', currentTheme);
+            });
+        }
+        function applySavedTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark-mode') {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
             }
+        }
+        applySavedTheme();
 
-            // Apply saved theme on page load
-            function applySavedTheme() {
-                const savedTheme = localStorage.getItem('theme');
-                if (savedTheme === 'dark-mode') {
-                    document.body.classList.add('dark-mode');
-                } else {
-                    document.body.classList.remove('dark-mode');
-                }
-            }
-            applySavedTheme();
+        // Modal logic
+        const modal = document.getElementById('editProfileModal');
+        const editProfileBtn = document.getElementById('editProfile');
+        const closeModalBtn = document.getElementById('closeModal');
+        const cancelEditBtn = document.getElementById('cancelEdit');
 
-            // Edit Profile Modal
-            const modal = document.getElementById('editProfileModal');
-            const editProfileBtn = document.getElementById('editProfile');
-            const closeModalBtn = document.getElementById('closeModal');
-            const cancelEditBtn = document.getElementById('cancelEdit');
-            const editBioBtn = document.getElementById('editBio');
-            const editskills = document.getElementById('editSkills');
-
-            // Open modal
-            editProfileBtn.addEventListener('click', () => {
-                modal.style.display = 'flex';
-                if (editBioBtn) editBioBtn.style.display = 'block';
-                if (editskills) editskills.style.display = 'block';
-            });
-
-            // Close modal
-            closeModalBtn.addEventListener('click', () => {
-                modal.style.display = 'none';
-            });
-
-            cancelEditBtn.addEventListener('click', () => {
-                modal.style.display = 'none';
-            });
-
-            // // Handle form submission
-            // const profileForm = document.getElementById('profileForm');
-            // profileForm.addEventListener('submit', async (e) => {
-            //     e.preventDefault(); // Prevent the default form submission
-
-            //     const formData = new FormData(profileForm);
-
-            //     try {
-            //         const response = await fetch(""), {
-            //             method: 'POST',
-            //             body: formData,
-            //         });
-
-            //         const data = await response.json();
-
-            //         if (data.success) {
-            //             // Update the name
-            //             const displayName = document.getElementById('displayName');
-            //             displayName.textContent = data.name || 'No name available.';
-
-            //             // Update the username
-            //             const displayUsername = document.getElementById('displayUsername');
-            //             displayUsername.textContent = `@${data.username}` || 'No username available.';
-
-            //             // Update the email
-            //             const displayEmail = document.getElementById('displayEmail');
-            //             displayEmail.textContent = data.email || 'No email available.';
-
-            //             // Update the bio
-            //             const bioContent = document.getElementById('bioContent');
-            //             bioContent.textContent = data.bio || 'No bio available.';
-
-            //             // Update the skills
-            //             const skillsContainer = document.getElementById('skillsContainer');
-            //             skillsContainer.innerHTML = '';
-            //             const skills = data.skills ? data.skills.split(',') : [];
-            //             if (skills.length > 0 && skills[0].trim() !== '') {
-            //                 skills.forEach(skill => {
-            //                     const skillTag = document.createElement('span');
-            //                     skillTag.className = 'skill-tag';
-            //                     skillTag.textContent = skill.trim();
-            //                     skillsContainer.appendChild(skillTag);
-            //                 });
-            //             } else {
-            //                 const noSkills = document.createElement('span');
-            //                 noSkills.className = 'skill-tag';
-            //                 noSkills.textContent = 'No skills added.';
-            //                 skillsContainer.appendChild(noSkills);
-            //             }
-
-            //             // Update stats
-            //             document.querySelector('.stat-card:nth-child(4) .stat-number').textContent = data.following || 0;
-
-            //             // Close the modal
-            //             modal.style.display = 'none';
-
-            //             // Show a success message (optional)
-            //             alert(data.message);
-            //         } else {
-            //             // Show an error message
-            //             alert(data.message);
-            //         }
-            //     } catch (error) {
-            //         console.error('Error updating profile:', error);
-            //         alert('An error occurred while updating the profile.');
-            //     }
-            // });
-
-        //     // Delete account
-        //     const deleteAccountBtn = document.getElementById('deleteAccount');
-        //     deleteAccountBtn.addEventListener('click', function() {
-        //         if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-        //             fetch("", {
-        //                 method: 'POST',
-        //                 headers: {
-        //                     'Content-Type': 'application/json',
-        //                 },
-        //             })
-        //             .then(response => {
-        //                 if (response.redirected) {
-        //                     window.location.href = response.url;
-        //                 } else {
-        //                     return response.json();
-        //                 }
-        //             })
-        //             .then(data => {
-        //                 if (data && data.error) {
-        //                     alert(data.error);
-        //                 }
-        //             })
-        //             .catch(error => {
-        //                 console.error('Error deleting account:', error);
-        //                 alert('An error occurred while deleting the account.');
-        //             });
-        //         }
-        //     });
+        editProfileBtn.addEventListener('click', () => {
+            modal.style.display = 'flex';
         });
+        closeModalBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+        cancelEditBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        // Optional: Close modal when clicking outside modal content
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
     </script>
 </body>
 </html>
+

@@ -232,3 +232,4 @@ setInterval(updateMood, 5000);
 
 // Initial mood update on page load
 updateMood();
+

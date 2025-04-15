@@ -28,17 +28,41 @@
             </div>
         </div>
         <div class="nav-links">
+            {% if user.is_authenticated %}
                 <div class="nav-item">
-                    <a href="#"><i class="fas fa-home"></i> Home</a>
+                    <a href="{% url 'home' %}"><i class="fas fa-home"></i> Home</a>
+                </div>
+                <div class="nav-item">
+                    <a href="{% url 'profile' %}"><i class="fas fa-user"></i> {{ user.first_name|default:user.username }} </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </div>
                 
+            {% else %}
+                <div class="nav-item">
+                    <a href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i> Login</a>
+                </div>
+                <div class="nav-item">
+                    <a href="{% url 'signup' %}"><i class="fas fa-user-plus"></i> Sign Up</a>
+                </div>
+            {% endif %}
             <div class="nav-item">
                 <button class="theme-toggle" id="themeToggle">
                     <i class="fas fa-moon"></i>
                 </button>
             </div>
-        </div>
+        </div>        
     </div>
+
+    <!-- Django messages -->
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="flash {{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 
     <main class="main-content">
         <!-- Left Sidebar -->
@@ -50,7 +74,8 @@
                         <i class="fas fa-user"></i>
                     </div>
                     <h2 class="profile-name">
-                        Kashish
+                        WELCOME, 
+                        {{ user.first_name|default:user.username }}!
                     </h2>
                     <p class="profile-headline"></p>
                     <div class="mood-indicator">
@@ -75,9 +100,9 @@
         <div class="feed-section">
             <!-- Post Section -->
             <div class="create-post">
-                <input type="hidden" id="createPostUrl" value="">
-                <input type="hidden" id="getPostsUrl" value="">
-                <input type="hidden" id="currentUserId" value=""> 
+                <input type="hidden" id="createPostUrl" value="{% url 'create_post' %}">
+                <input type="hidden" id="getPostsUrl" value="{% url 'get_posts' %}">
+                <input type="hidden" id="currentUserId" value="{{ user.id }}">
                 <div class="post-input">
                     <div class="post-avatar">
                         <i class="fas fa-user"></i>
@@ -94,31 +119,15 @@
                     </div>
                     <div class="post-action">📅 Event</div>
                     <div class="post-action">📝 Write Article</div>
-                    <button class="post-action" id="submitPost">Post</button> 
+                    <button class="post-action" id="submitPost">Post</button>
                 </div>
             </div>
             
             <!-- Posts Feed -->
             <div class="posts-feed" id="postsFeed">
                 <div id="loading" style="display: none;">Loading posts...</div>
-                <!-- Example Post Card  -->
-                <div class="post">
-                    <div class="post-header">
-                        <div class="post-user">
-                            <span class="post-username">Username</span>
-                            <div class="post-timestamp">
-                                <span class="post-date">Date</span>
-                                <span class="post-time">Time</span>
-                            </div>
-                        </div>
-                        <button class="delete-post" data-post-id="1">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                    <div class="post-content">This is a sample post content.</div>
-                </div>
+                <!-- Posts will be loaded here by JS -->
             </div>
-
 
             <!-- Trending section  -->
             <div class="news-section">
@@ -193,7 +202,10 @@
                 </div>
             </div>
         </div>
+        
     </main>
+
+    
 
     <script src="{% static 'users/home.js' %}"></script>
 </body>

@@ -658,6 +658,7 @@ button:hover {
     padding: 20px;
     border-radius: 1rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 4rem;
 }
 
 .news-header {
@@ -736,6 +737,7 @@ button:hover {
 .news-meta i {
     color: var(--primary-color);
 }
+
 
 /* Responsive Breakpoints */
 @media (max-width: 1024px) {
@@ -857,3 +859,4 @@ button:hover {
 .search-container.active {
     display: block;
 }
+
