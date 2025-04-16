@@ -1,4 +1,3 @@
-
 document.querySelector('.search-btn').addEventListener('click', function() {
     document.querySelector('.search-input').focus();
 });
@@ -54,186 +53,272 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-   // Get the URLs for the create_post and get_posts routes
+   // Get the URLs and current user ID
    const createPostUrl = document.getElementById('createPostUrl').value;
    const getPostsUrl = document.getElementById('getPostsUrl').value;
    const currentUserId = parseInt(document.getElementById('currentUserId').value, 10);
 
    console.log('Current User ID:', currentUserId); // Log the current user ID
 
-   // Get references to DOM elements
-   const submitPostBtn = document.getElementById('submitPost'); // Submit button
-   const postContent = document.getElementById('postContent'); // Post input field
-   const postsFeed = document.getElementById('postsFeed'); // Posts feed container
-   const loading = document.getElementById('loading'); // Loading indicator
+   // Get DOM elements
+   const submitPostBtn = document.getElementById('submitPost');
+   const postContent = document.getElementById('postContent');
+   const postsFeed = document.getElementById('postsFeed');
+   const loading = document.getElementById('loading');
 
-   // Function to load posts
-   function loadPosts() {
-    console.log('Loading posts...'); // Log when the function starts
-    loading.style.display = 'block'; // Show loading indicator
+   // Load posts when page loads
+   loadPosts();
 
-    fetch(getPostsUrl)
-        .then(response => {
-            console.log('Fetch response:', response); // Log the fetch response
-            if (!response.ok) {
-                throw new Error('Failed to fetch posts');
-            }
-            return response.json();
-        })
+   // Handle post submission
+   if (submitPostBtn) {
+       submitPostBtn.addEventListener('click', function() {
+           const content = postContent.value.trim();
+           if (!content) {
+               alert('Please enter some content for your post.');
+               return;
+           }
+
+           const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+           fetch(createPostUrl, {
+               method: 'POST',
+               headers: {
+                   'Content-Type': 'application/x-www-form-urlencoded',
+                   'X-CSRFToken': csrfToken
+               },
+               body: `content=${encodeURIComponent(content)}`
+           })
+           .then(response => response.json())
         .then(data => {
-            console.log('Response Data:', data); // Log the response data
             if (data.success) {
-                console.log('Posts fetched successfully:', data.posts); // Log the posts
-                postsFeed.innerHTML = ''; // Clear existing posts
-                if (data.posts.length === 0) {
-                    console.log('No posts available.'); // Log if there are no posts
-                    postsFeed.innerHTML = '<div class="no-posts">No posts available. Be the first to share something!</div>';
+                   postContent.value = '';
+                   const newPost = createPostElement(data.post);
+                   postsFeed.insertBefore(newPost, postsFeed.firstChild);
+                   if (data.post_count !== undefined) {
+                       updatePostCount(data.post_count);
+                   }
                 } else {
-                    console.log('Displaying posts...'); // Log before displaying posts
-                    data.posts.forEach(post => {
-                        const postElement = document.createElement('div');
-                        postElement.className = 'post';
-                        postElement.innerHTML = `
-                            <div class="post-header">
-                                <div class="post-user">
-                                    <span class="post-username">${post.username}</span>
-                                    <div class="post-timestamp">
-                                        <span class="post-date">${new Date(post.timestamp).toLocaleDateString()}</span>
-                                        <span class="post-time">${new Date(post.timestamp).toLocaleTimeString()}</span>
-                                    </div>
-                                </div>
-                                ${post.user_id === currentUserId ? 
-                                    `<button class="delete-post" data-post-id="${post.id}">
-                                        <i class="fas fa-trash"></i>
-                                    </button>` : ''
-                                }
-                            </div>
-                            <div class="post-content">${post.content}</div>
-                        `;
-                        postsFeed.appendChild(postElement);
-                    
-                        // Add event listener to delete button if it exists
-                        const deleteButton = postElement.querySelector('.delete-post');
-                        if (deleteButton) {
-                            deleteButton.addEventListener('click', () => {
-                                const postId = deleteButton.getAttribute('data-post-id');
-                                deletePost(postId);
-                            });
-                        }
-                    });
-
-                    console.log('Posts displayed.'); // Log after displaying posts
-
-                    // Add event listeners to delete buttons
-                    document.querySelectorAll('.delete-post').forEach(button => {
-                        button.addEventListener('click', () => {
-                            const postId = button.getAttribute('data-post-id');
-                            deletePost(postId);
-                        });
-                    });
-                }
+                   alert(data.message || 'Failed to create post.');
             }
         })
         .catch(error => {
-            console.error('Error fetching posts:', error);
-            postsFeed.innerHTML = '<div class="error">Failed to load posts. Please try again later.</div>';
-        })
-        .finally(() => {
-            console.log('Loading complete.'); // Log when loading is complete
-            loading.style.display = 'none'; // Hide loading indicator
-        });
+               console.error('Error:', error);
+               alert('An error occurred while creating the post.');
+           });
+       });
+   }
+
+   // Function to create a post element
+    function createPostElement(post) {
+       const isCurrentUser = post.user_id === currentUserId;
+        const postElement = document.createElement('div');
+        postElement.className = 'post';
+        postElement.id = `post-${post.id}`;
+        
+        postElement.innerHTML = `
+            <div class="post-header">
+                <div class="post-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="post-info">
+                    <div class="post-author">${post.username}</div>
+                   <div class="post-time">${formatTimestamp(post.timestamp)}</div>
+                </div>
+                ${isCurrentUser ? `
+                    <div class="post-actions">
+                        <button class="edit-post-btn" onclick="startEditPost(${post.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-post-btn" onclick="deletePost(${post.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                ` : ''}
+            </div>
+            <div class="post-content" id="post-content-${post.id}">
+                ${post.content}
+            </div>
+            <div class="post-edit-form" id="post-edit-${post.id}" style="display: none;">
+                <textarea class="edit-content">${post.content}</textarea>
+                <div class="edit-actions">
+                    <button class="save-edit-btn" onclick="saveEdit(${post.id})">Save</button>
+                    <button class="cancel-edit-btn" onclick="cancelEdit(${post.id})">Cancel</button>
+                </div>
+            </div>
+        `;
+        
+        return postElement;
     }
 
-   // Function to delete a post
-   function deletePost(postId) {
-        if (confirm('Are you sure you want to delete this post?')) {
-            const formData = new FormData();
+   // Function to format timestamp
+   function formatTimestamp(timestamp) {
+       const date = new Date(timestamp);
+       return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+   }
+
+   // Function to update post count
+   function updatePostCount(count) {
+       const postCountElement = document.querySelector('.stat-card:nth-child(2) .stat-number');
+       if (postCountElement) {
+           postCountElement.textContent = count;
+       }
+   }
+
+   // Make these functions global
+   window.startEditPost = function(postId) {
+        const contentDiv = document.getElementById(`post-content-${postId}`);
+        const editForm = document.getElementById(`post-edit-${postId}`);
+        
+        contentDiv.style.display = 'none';
+        editForm.style.display = 'block';
+   };
+
+   window.cancelEdit = function(postId) {
+        const contentDiv = document.getElementById(`post-content-${postId}`);
+        const editForm = document.getElementById(`post-edit-${postId}`);
+        
+        contentDiv.style.display = 'block';
+        editForm.style.display = 'none';
+   };
+
+   window.saveEdit = function(postId) {
+        const editForm = document.getElementById(`post-edit-${postId}`);
+        const content = editForm.querySelector('.edit-content').value.trim();
+        
+        if (!content) {
+            alert('Post content cannot be empty!');
+            return;
+        }
+        
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        fetch(`/edit_post/${postId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken
+            },
+            body: `content=${encodeURIComponent(content)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const contentDiv = document.getElementById(`post-content-${postId}`);
+                contentDiv.textContent = content;
+               window.cancelEdit(postId);
+            } else {
+               alert(data.message || 'Failed to update post.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while updating the post.');
+        });
+   };
+
+   window.deletePost = function(postId) {
+       if (!confirm('Are you sure you want to delete this post?')) {
+           return;
+    }
+
+       const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
             
-            fetch(`/delete_post/${postId}/`, {  // Note the trailing slash
-                method: 'POST',  // Change from DELETE to POST
+       fetch(`/delete_post/${postId}/`, {
+           method: 'POST',
                 headers: {
-                    'X-CSRFToken': csrftoken
-                },
-                credentials: 'same-origin',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
+               'X-CSRFToken': csrfToken
+           }
+       })
+       .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    loadPosts(); // Reload posts after successful deletion
+               const postElement = document.getElementById(`post-${postId}`);
+               if (postElement) {
+                   postElement.remove();
+               }
+               if (data.post_count !== undefined) {
+                   updatePostCount(data.post_count);
+               }
                 } else {
-                    alert(data.message || 'Failed to delete post');
+               alert(data.message || 'Failed to delete post.');
                 }
             })
             .catch(error => {
-                console.error('Error deleting post:', error);
-                alert('An error occurred while deleting the post. Please try again.');
-            });
-        }
-    }
+           console.error('Error:', error);
+           alert('An error occurred while deleting the post.');
+       });
+   };
 
-   // Get CSRF token from the page
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+   // Function to load posts
+   function loadPosts() {
+       loading.style.display = 'block';
+       const currentUserId = parseInt(document.getElementById('currentUserId').value, 10);
+       console.log('Current User ID:', currentUserId); // Debug line
 
-    // Handle post submission
-    submitPostBtn.addEventListener('click', () => {
-        const content = postContent.value.trim();
-        if (!content) {
-            alert('Post content cannot be empty.');
-            return;
-        }
-
-        console.log('Submitting post:', content);
-
-        // Create FormData object
-        const formData = new FormData();
-        formData.append('content', content);
-
-        fetch(createPostUrl, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrftoken,
-            },
-            body: formData,
-            credentials: 'same-origin'  // This is important for cookies/session
-        })
-        .then(response => {
-            if (!response.ok) {
-                // If the response wasn't ok, throw an error with the status
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Create post data:', data);
-            if (data.success) {
-                postContent.value = ''; // Clear the input
-                loadPosts(); // Reload posts
-            } else {
-                alert(data.message || 'Failed to create post');
+       fetch(getPostsUrl)
+           .then(response => response.json())
+           .then(data => {
+               if (data.success) {
+                   console.log('Posts data:', data.posts); // Debug line
+                   postsFeed.innerHTML = '';
+                   if (data.posts.length === 0) {
+                       postsFeed.innerHTML = '<div class="no-posts">No posts available. Be the first to share something!</div>';
+                   } else {
+                       data.posts.forEach(post => {
+                           const isCurrentUser = post.user_id === currentUserId;
+                           console.log(`Post ${post.id} - User ID: ${post.user_id}, Current User: ${currentUserId}, Is Match: ${isCurrentUser}`); // Debug line
+                           
+                           const postElement = document.createElement('div');
+                           postElement.className = 'post';
+                           postElement.id = `post-${post.id}`;
+                           
+                           postElement.innerHTML = `
+                               <div class="post-header">
+                                   <div class="post-user">
+                                       <div class="post-avatar">
+                                           <i class="fas fa-user"></i>
+                                       </div>
+                                       <div class="post-info">
+                                           <span class="post-username">${post.username}</span>
+                                           <div class="post-timestamp">
+                                               <span>${new Date(post.timestamp).toLocaleString()}</span>
+                                           </div>
+                                       </div>
+                                   </div>
+                                   ${isCurrentUser ? `
+                                       <div class="post-actions">
+                                           <button class="edit-post-btn" onclick="startEditPost(${post.id})">
+                                               <i class="fas fa-edit"></i>
+                                           </button>
+                                           <button class="delete-post-btn" onclick="deletePost(${post.id})">
+                                               <i class="fas fa-trash"></i>
+                                           </button>
+                                       </div>
+                                   ` : ''}
+                               </div>
+                               <div class="post-content" id="post-content-${post.id}">${post.content}</div>
+                               <div class="post-edit-form" id="post-edit-${post.id}" style="display: none;">
+                                   <textarea class="edit-content">${post.content}</textarea>
+                                   <div class="edit-actions">
+                                       <button class="save-edit-btn" onclick="saveEdit(${post.id})">Save</button>
+                                       <button class="cancel-edit-btn" onclick="cancelEdit(${post.id})">Cancel</button>
+                                   </div>
+                               </div>
+                           `;
+                           
+                           postsFeed.appendChild(postElement);
+                       });
+                   }
             }
         })
         .catch(error => {
-            console.error('Error creating post:', error);
-            alert('An error occurred while creating the post. Please try again.');
-        });
-    });
-
-   // Handle post submission on Enter key press
-   postContent.addEventListener('keypress', function(event) {
-       if (event.key === 'Enter') {
-           event.preventDefault(); // Prevent default behavior (e.g., new line)
-           submitPostBtn.click(); // Trigger the post submission
-       }
-   });
-
-   // Load posts when the page loads
-   loadPosts();
+               console.error('Error:', error);
+               postsFeed.innerHTML = '<div class="error">Failed to load posts. Please try again later.</div>';
+           })
+           .finally(() => {
+               loading.style.display = 'none';
+           });
+   }
 });
 
 // Automatically hide flash messages after 2 seconds

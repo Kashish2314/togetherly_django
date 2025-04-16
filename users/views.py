@@ -144,9 +144,6 @@ def create_post(request):
             
             post = Post.objects.create(user=request.user, content=content)
             
-            # Get updated post count
-            post_count = Post.objects.filter(user=request.user).count()
-            
             return JsonResponse({
                 'success': True,
                 'message': 'Post created successfully!',
@@ -156,8 +153,7 @@ def create_post(request):
                     'timestamp': post.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
                     'username': request.user.username,
                     'user_id': request.user.id
-                },
-                'post_count': post_count  # Add post count to response
+                }
             })
         except Exception as e:
             return JsonResponse({
@@ -206,4 +202,37 @@ def logout_view(request):
     auth_logout(request)
     messages.success(request, 'You have been logged out.')
     return redirect('home')
+
+@login_required
+def edit_post(request, post_id):
+    if request.method == 'POST':
+        post = get_object_or_404(Post, id=post_id)
+        if post.user != request.user:
+            return JsonResponse({'success': False, 'message': 'You can only edit your own posts.'}, status=403)
+        try:
+            content = request.POST.get('content', '').strip()
+            if not content:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Post content cannot be empty.'
+                }, status=400)
+            
+            post.content = content
+            post.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Post updated successfully!',
+                'post': {
+                    'id': post.id,
+                    'content': post.content,
+                    'timestamp': post.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                    'username': post.user.username,
+                    'user_id': post.user.id
+                }
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'}, status=405)
 
