@@ -30,10 +30,16 @@
         <div class="nav-links">
             {% if user.is_authenticated %}
                 <div class="nav-item">
-                    <a href="{% url 'home' %}"><i class="fas fa-home"></i> Home</a>
+                    <a href="{% url 'home' %}" style="color: rgb(94, 77, 224); transform: scale(1.1);"><i class="fas fa-home"></i> Home</a>
                 </div>
                 <div class="nav-item">
                     <a href="{% url 'profile' %}"><i class="fas fa-user"></i> {{ user.first_name|default:user.username }} </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{% url 'messaging' %}"><i class="fas fa-envelope"></i> Messages</a>
+                </div>
+                <div class="nav-item">
+                    <a href="{% url 'connections' %}"><i class="fas fa-users"></i> Connections</a>
                 </div>
                 <div class="nav-item">
                     <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -204,8 +210,6 @@
         </div>
         
     </main>
-
-    
 
     <script src="{% static 'users/home.js' %}"></script>
 </body>
