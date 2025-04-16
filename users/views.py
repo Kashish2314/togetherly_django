@@ -103,22 +103,37 @@ def delete_account(request):
 @login_required
 def create_post(request):
     if request.method == 'POST':
-        content = request.POST.get('content')
-        if not content:
-            return JsonResponse({'success': False, 'message': 'Post content cannot be empty.'}, status=400)
-        post = Post.objects.create(user=request.user, content=content)
-        return JsonResponse({
-            'success': True,
-            'message': 'Post created successfully!',
-            'post': {
-                'id': post.id,
-                'content': post.content,
-                'timestamp': post.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-                'username': request.user.username,
-                'user_id': request.user.id
-            }
-        })
-    return JsonResponse({'success': False, 'message': 'Invalid request.'}, status=400)
+        try:
+            content = request.POST.get('content')
+            if not content:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Post content cannot be empty.'
+                }, status=400)
+            
+            post = Post.objects.create(user=request.user, content=content)
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Post created successfully!',
+                'post': {
+                    'id': post.id,
+                    'content': post.content,
+                    'timestamp': post.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                    'username': request.user.username,
+                    'user_id': request.user.id
+                }
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': str(e)
+            }, status=500)
+            
+    return JsonResponse({
+        'success': False,
+        'message': 'Invalid request method.'
+    }, status=405)
 
 def get_posts(request):
     posts = Post.objects.all().order_by('-timestamp')
@@ -135,13 +150,16 @@ def get_posts(request):
 
 @login_required
 def delete_post(request, post_id):
-    if request.method == 'DELETE':
+    if request.method == 'POST':  # Change from DELETE to POST
         post = get_object_or_404(Post, id=post_id)
         if post.user != request.user:
             return JsonResponse({'success': False, 'message': 'You can only delete your own posts.'}, status=403)
-        post.delete()
-        return JsonResponse({'success': True, 'message': 'Post deleted successfully!'})
-    return JsonResponse({'success': False, 'message': 'Invalid request.'}, status=400)
+        try:
+            post.delete()
+            return JsonResponse({'success': True, 'message': 'Post deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'}, status=405)
 
 def logout_view(request):
     auth_logout(request)

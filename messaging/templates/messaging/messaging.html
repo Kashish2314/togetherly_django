@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
+    {% csrf_token %}
     <div class="navbar">
         <div class="logo">
             <div class="logo-icon">
@@ -65,131 +66,86 @@
     <script src="https://static.elfsight.com/platform/platform.js" async></script>
     <div class="elfsight-app-5377efc7-849e-41e6-b925-15c160b1ebd8" data-elfsight-app-lazy></div>
 
-  <div class="content container">
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <span>Messages</span>
-        </div>
-        <div class="sidebar-search">
-            <input type="text" placeholder="Search messages">
-        </div>
-        <ul class="conversations">
-            <li class="conversation-item active">
-            <div class="avatar">
-                <img src="https://as1.ftcdn.net/jpg/03/39/45/96/1000_F_339459697_XAFacNQmwnvJRqe1Fe9VOptPWMUxlZP8.jpg" alt="avatar">
+   <div class="content container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <span>Messages</span>
             </div>
-            <div class="conversation-content">
-                <div class="name">
-                <span>Alex Johnson</span>
-                <span class="time">10:45 AM</span>
-                </div>
-                <div class="preview">I'd be happy to chat about potential collaborations...</div>
-            </div>
-            </li>
-            <li class="conversation-item">
-            <div class="avatar">EM</div>
-            <div class="conversation-content">
-                <div class="name">
-                <span>Emily Wong</span>
-                <span class="time">Yesterday</span>
-                </div>
-                <div class="preview">Your tips about user feedback collection were helpful!</div>
-            </div>
-            </li>
-            <li class="conversation-item">
-            <div class="avatar">MC</div>
-            <div class="conversation-content">
-                <div class="name">
-                <span>Michael Chen</span>
-                <span class="time">2 days ago</span>
-                </div>
-                <div class="preview">Thanks for the recommendations! We'll take a look...</div>
-            </div>
-            </li>
-            <li class="conversation-item">
-            <div class="avatar">
-                <img src="https://as1.ftcdn.net/jpg/03/39/45/96/1000_F_339459697_XAFacNQmwnvJRqe1Fe9VOptPWMUxlZP8.jpg" alt="avatar">
-            </div>
-            <div class="conversation-content">
-                <div class="name">
-                <span>Sarah Peters</span>
-                <span class="time">3 days ago</span>
-                </div>
-                <div class="preview">The proposal looks great! Let's discuss on Monday.</div>
-            </div>
-            </li>
-            <li class="conversation-item">
-            <div class="avatar">JD</div>
-            <div class="conversation-content">
-                <div class="name">
-                <span>James Decker</span>
-                <span class="time">1 week ago</span>
-                </div>
-                <div class="preview">I'm excited to collaborate on the new project!</div>
-            </div>
-            </li>
-        </ul>
-        <button class="new-message-btn">
-            <i class="fas fa-plus"></i> New Message
-        </button>
-    </aside>
 
-    <main class="chat-container">
-      <div class="chat-header">
-        <div class="chat-header-info">
-          <div class="avatar">
-            <img src="https://as1.ftcdn.net/jpg/03/39/45/96/1000_F_339459697_XAFacNQmwnvJRqe1Fe9VOptPWMUxlZP8.jpg" alt="avatar">
-          </div>
-          <div>
-            <h3>Alex Johnson <span class="online-badge"></span></h3>
-            <span class="preview">Online</span>
-          </div>
-        </div>
-        <div class="chat-header-actions">
-          <button class="action-btn">
-            <i class="fas fa-phone"></i>
-          </button>
-          <button class="action-btn">
-            <i class="fas fa-video"></i>
-          </button>
-          <button class="action-btn">
-            <i class="fas fa-info-circle"></i>
-          </button>
-        </div>
-      </div>
+            <!-- All Users Chat List -->
+            <ul class="conversations">
+                {% for user in all_users %}
+                    <li class="conversation-item">
+                        <a href="{% url 'start_conversation' user.id %}" class="conversation-link">
+                            <div class="avatar">
+                                <!-- You can add profile picture logic here if needed -->
+                                <div class="avatar-text">{{ user.username|make_list|slice:":2"|join:""|upper }}</div>
+                            </div>
+                            <div class="conversation-content">
+                                <div class="name">
+                                    <span>
+                                        {% if user.userprofile.name %}
+                                            {{ user.userprofile.name }}
+                                        {% else %}
+                                            {{ user.username }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="preview">
+                                    {% if user.userprofile.bio %}
+                                        {{ user.userprofile.bio|truncatechars:30 }}
+                                    {% else %}
+                                        Click to start chatting
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </aside>
 
-      <div class="chat-messages" id="chat-messages">
-        <div class="message message-received">
-          <p>Hi Sarah, I saw your post about marketing strategies. I'd love to connect and discuss some collaboration opportunities.</p>
-          <span class="message-time">10:23 AM</span>
-        </div>
-        <div class="message message-sent">
-          <p>Hi Alex! Thanks for reaching out. I'd be happy to chat about potential collaborations. What did you have in mind?</p>
-          <span class="message-time">10:45 AM</span>
-        </div>
-        <div class="message message-received">
-          <p>Great! We're launching a new product next month and looking for effective go-to-market strategies. Your experience would be valuable. Are you free for a call this week?</p>
-          <span class="message-time">11:02 AM</span>
-        </div>
-        <!-- More messages will be added dynamically -->
-      </div>
+        <main class="chat-container" id="chat-container">
+            {% if active_conversation %}
+                <div class="chat-header">
+                    <div class="chat-header-info">
+                        <div class="avatar">
+                                <div class="avatar-text">{{ other_user.username|make_list|slice:":2"|join:""|upper }}</div>
+                        </div>
+                        <div>
+                            <h3>{{ other_user.get_full_name|default:other_user.username }}</h3>
+                        </div>
+                    </div>
+                </div>
 
-      <div class="chat-input-container">
-        <button class="attach-btn">
-          <i class="fas fa-paperclip"></i>
-        </button>
-        <input type="text" class="chat-input" id="message-input" placeholder="Type a message...">
-        <button class="attach-btn">
-          <i class="far fa-smile"></i>
-        </button>
-        <button class="send-btn" id="send-btn">
-          <i class="fas fa-paper-plane"></i>
-        </button>
-      </div>
-    </main>
-  </div>
+                <div class="chat-messages" id="chat-messages">
+                    {% for message in messages %}
+                        <div class="message {% if message.sender == user %}message-sent{% else %}message-received{% endif %}">
+                            <p>{{ message.content }}</p>
+                            <span class="message-time">{{ message.timestamp|date:"g:i A" }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
 
-  <script>
+                <div class="chat-input-container" >
+                    <form id="message-form" method="post" action="{% url 'conversation_detail' active_conversation.id %}" style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                        {% csrf_token %}
+                        <input type="text" name="content" class="chat-input" id="message-input" placeholder="Type a message...">
+                        <button type="submit" class="send-btn" id="send-btn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            {% else %}
+                <div class="no-conversation-selected" style="display: flex; justify-content: center; align-items: center; height: 100%;font-size: 1.5rem;">
+                    <i class="fas fa-comments"></i>
+                    <p>Select a conversation or start a new one</p>
+                </div>
+            {% endif %}
+        </main>
+    </div>
+
+<script>
     
     document.querySelector('.search-btn').addEventListener('click', function() {
         document.querySelector('.search-input').focus();
@@ -216,121 +172,91 @@
         }
     }
     applySavedTheme();
+
+
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     
-    // Mobile menu toggle
-    const mobileMenuBtn = document.getElementById('mobile-menu');
-    const sidebar = document.getElementById('sidebar');
-    
-    mobileMenuBtn.addEventListener('click', () => {
-      sidebar.classList.toggle('active');
-    });
-    
-    // Send message functionality
-    const sendBtn = document.getElementById('send-btn');
-    const messageInput = document.getElementById('message-input');
-    const chatMessages = document.getElementById('chat-messages');
-    
-    sendBtn.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        sendMessage();
-      }
-    });
-    
-    function sendMessage() {
-      const message = messageInput.value.trim();
-      
-      if (message !== '') {
-        // Create new message element
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message', 'message-sent');
-        
-        // Get current time
-        const now = new Date();
-        const hours = now.getHours();
-        const minutes = now.getMinutes();
-        const formattedTime = `${hours}:${minutes < 10 ? '0' + minutes : minutes}`;
-        
-        // Add message content
-        messageElement.innerHTML = `
-          <p>${message}</p>
-          <span class="message-time">${formattedTime}</span>
-        `;
-        
-        // Add to chat
-        chatMessages.appendChild(messageElement);
-        
-        // Clear input
-        messageInput.value = '';
-        
-        // Scroll to bottom
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-        
-        // Simulate response after a delay
-        if (Math.random() > 0.5) {
-          setTimeout(() => {
-            const responses = [
-              "That sounds great! Can we set up a meeting to discuss further?",
-              "Thanks for sharing. I'll review and get back to you soon.",
-              "Interesting approach! Have you considered alternative strategies?",
-              "I appreciate your insights. Let me connect you with our team lead."
-            ];
-            
-            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-            
-            const responseElement = document.createElement('div');
-            responseElement.classList.add('message', 'message-received');
-            responseElement.innerHTML = `
-              <p>${randomResponse}</p>
-              <span class="message-time">${formattedTime}</span>
-            `;
-            
-            chatMessages.appendChild(responseElement);
+    // Function to scroll chat to bottom
+    function scrollToBottom() {
+        const chatMessages = document.getElementById('chat-messages');
+        if (chatMessages) {
             chatMessages.scrollTop = chatMessages.scrollHeight;
-          }, 1500);
         }
-      }
     }
-    
-    // Add ripple effect to buttons
-    const buttons = document.querySelectorAll('.btn, .send-btn, .new-message-btn');
-    
-    buttons.forEach(button => {
-      button.addEventListener('click', function(e) {
-        const ripple = document.createElement('span');
-        const rect = this.getBoundingClientRect();
-        
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        ripple.style.left = x + 'px';
-        ripple.style.top = y + 'px';
-        
-        this.appendChild(ripple);
-        
-        setTimeout(() => {
-          ripple.remove();
-        }, 600);
-      });
+
+    // Scroll to bottom on page load
+    scrollToBottom();
+
+    // Handle message form submission
+    const messageForm = document.getElementById('message-form');
+    if (messageForm) {
+        messageForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('message-input');
+            const content = input.value.trim();
+
+            if (!content) return;
+
+            try {
+                const response = await fetch(messageForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: `content=${encodeURIComponent(content)}`
+                });
+
+                if (response.ok) {
+                    input.value = '';
+                    // Reload messages or append new message
+                    location.reload(); // For simplicity, but you might want to handle this more elegantly
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+            }
+        });
+    }
+
+    // Handle conversation clicks
+    document.querySelectorAll('.conversation-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const conversationId = item.dataset.conversationId;
+            window.location.href = `/messaging/conversation/${conversationId}/`;
+        });
     });
-    
-    // Conversation item click
-    const conversationItems = document.querySelectorAll('.conversation-item');
-    
-    conversationItems.forEach(item => {
-      item.addEventListener('click', function() {
-        // Remove active class from all items
-        conversationItems.forEach(i => i.classList.remove('active'));
-        
-        // Add active class to clicked item
-        this.classList.add('active');
-        
-        // On mobile, close sidebar after selection
-        if (window.innerWidth <= 768) {
-          sidebar.classList.remove('active');
-        }
-      });
-    });
-  </script>
+
+    // Search functionality
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                const name = item.querySelector('.name span').textContent.toLowerCase();
+                if (name.includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // Check for new messages periodically
+    if (window.active_conversation_id) {
+        setInterval(async () => {
+            try {
+                const response = await fetch(`/messaging/conversation/${window.active_conversation_id}/check_new/`);
+                const data = await response.json();
+                if (data.new_messages.length > 0) {
+                    location.reload(); // For simplicity
+                }
+            } catch (error) {
+                console.error('Error checking new messages:', error);
+            }
+        }, 5000); // Check every 5 seconds
+    }
+</script>
+
 </body>
 </html>

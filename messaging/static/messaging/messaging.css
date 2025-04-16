@@ -1,4 +1,3 @@
-
 :root {
     --primary-color: #6366f1;
     --text-color: #333;
@@ -7,17 +6,17 @@
     --border-color: #e5e7eb;
     --hover-bg: #f9fafb;
     --shadow: 0 1px 3px rgba(0,0,0,0.1);
-    --message-sent: #e9efff;
-    --message-received: #f3f4f6;
+    --message-sent: #3e4044;
+    --message-received: #3666c5;
 }
 
 .dark-mode {
     --primary-color: #818cf8;
     --text-color: #e5e7eb;
-    --bg-color: #1f2937;
+    --bg-color: #0b0e12;
     --card-bg: #111827;
     --border-color: #374151;
-    --hover-bg: #374151;
+    --hover-bg: #414c5da7;
     --shadow: 0 1px 3px rgba(0,0,0,0.3);
     --message-sent: #4f46e5;
     --message-received: #1f2937;
@@ -275,107 +274,67 @@ button:hover {
     background-color: rgba(128, 128, 128, 0.084);
     margin: 8rem auto;
     max-width: 1400px;
+    padding: 1rem 1rem;
 }
 
 .sidebar {
-    width: 400px;
-    border-right: 1px solid var(--border-color);
-    overflow-y: hidden;
-    height: calc(100vh - 60px);
-    position: sticky;
-    top: 60px;
-    justify-content: center;
-    align-items: center;
+    width: 300px;
+    border-right: 1px solid #ddd;
+    height: 100%;
+    overflow-y: auto;
+    background: #fff;
 }
 
 .sidebar-header {
     padding: 20px;
-    border-bottom: 1px solid var(--border-color);
-    font-size: 1.7rem;
+    border-bottom: 1px solid #ddd;
     font-weight: bold;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.sidebar-search {
-    padding: 15px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.sidebar-search input {
-    width: 100%;
-    padding: 10px 15px;
-    border-radius: 20px;
-    border: 1px solid var(--border-color);
-    background-color: var(--card-bg);
-    color: var(--text-color);
-}
-
-/* New Message button */
-.new-message-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--primary-color);
-    color: white;
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    font-size: 1rem;
-    border: none;
-    padding: 10px;
-    border-radius: 5px;
-    width: 90%;
-    cursor: pointer;
-    transition: transform 0.2s;
-    position: absolute;
-    bottom: 2rem;
-    left: 1.3rem;
-}
-
-.new-message-btn:hover {
-    transform: scale(1.03);
+    font-size: 1.2em;
+    height: 100%;
+    background-color: var(--bg-color);
 }
 
 .conversations {
     list-style: none;
-    margin: 1rem 0 1rem 0;
+    padding: 0;
+    margin: 0;
+    background-color: var(--bg-color);
+    height: 100%;
 }
 
 .conversation-item {
     padding: 15px;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
 }
 
 .conversation-item:hover {
-    background-color: var(--hover-bg);
+    background-color: #f8f9fa;
+    cursor: pointer;
 }
 
-.conversation-item.active {
-    background-color: rgba(99, 102, 241, 0.1);
-    border-left: 3px solid var(--primary-color);
+.conversation-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
 }
 
 .avatar {
     width: 50px;
     height: 50px;
     border-radius: 50%;
+    background: #7c6cf9;
     margin-right: 15px;
-    background-color: #ddd;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #666;
-    font-weight: bold;
-    overflow: hidden;
 }
 
-.avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.avatar-text {
+    color: white;
+    font-weight: bold;
+    font-size: 1.2em;
 }
 
 .conversation-content {
@@ -383,42 +342,18 @@ button:hover {
 }
 
 .name {
-    font-weight: 600;
+    font-weight: bold;
     margin-bottom: 5px;
-    display: flex;
-    justify-content: space-between;
-}
-
-.time {
-    font-size: 0.8rem;
-    color: #888;
+    color: var(--text-color);
 }
 
 .preview {
-    font-size: 0.85rem;
-    color: #888;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 180px;
+    font-size: 0.9em;
+    color: var(--text-color);
 }
 
-.badge {
-    display: inline-flex;
-    width: 8px;
-    height: 8px;
-    background-color: var(--primary-color);
-    border-radius: 50%;
-    margin-left: 5px;
-}
-
-.online-badge {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    background-color: #10b981;
-    border-radius: 50%;
-    margin-left: 5px;
+.active {
+    background-color: #f0f2ff;
 }
 
 /* Main chat area */
@@ -427,6 +362,7 @@ button:hover {
     display: flex;
     flex-direction: column;
     height: calc(100vh - 60px);
+    background-color: var(--bg-color);
 }
 
 .chat-header {
@@ -515,15 +451,19 @@ button:hover {
     border-top: 1px solid var(--border-color);
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
 }
 
 .chat-input {
-    flex: 1;
+    /* flex: 1; */
     padding: 12px 15px;
     border-radius: 24px;
     border: 1px solid var(--border-color);
     background-color: var(--card-bg);
     color: var(--text-color);
+    width: 70%;
 }
 
 .chat-input:focus {
@@ -613,6 +553,65 @@ button:hover {
 
 .mobile-menu-btn {
     display: none;
+}
+
+/* Add these styles to your existing CSS */
+.users-section {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.users-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.user-item {
+    padding: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+}
+
+.user-item:hover {
+    background-color: #f8f9fa;
+}
+
+.user-link {
+    display: flex;
+    text-decoration: none;
+    color: inherit;
+}
+
+.user-info {
+    flex-grow: 1;
+}
+
+.user-name {
+    display: block;
+    font-weight: bold;
+    color: #333;
+}
+
+.user-bio {
+    display: block;
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 4px;
+}
+
+.sidebar-search {
+    padding: 10px;
+}
+
+.sidebar-search input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
 }
 
 

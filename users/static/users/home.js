@@ -111,6 +111,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="post-content">${post.content}</div>
                         `;
                         postsFeed.appendChild(postElement);
+                    
+                        // Add event listener to delete button if it exists
+                        const deleteButton = postElement.querySelector('.delete-post');
+                        if (deleteButton) {
+                            deleteButton.addEventListener('click', () => {
+                                const postId = deleteButton.getAttribute('data-post-id');
+                                deletePost(postId);
+                            });
+                        }
                     });
 
                     console.log('Posts displayed.'); // Log after displaying posts
@@ -137,60 +146,83 @@ document.addEventListener('DOMContentLoaded', function() {
 
    // Function to delete a post
    function deletePost(postId) {
-       if (confirm('Are you sure you want to delete this post?')) {
-           fetch(`/delete_post/${postId}`, {
-               method: 'DELETE',
-           })
-               .then(response => response.json())
-               .then(data => {
-                   if (data.success) {
-                       loadPosts(); // Reload posts after deletion
-                   } else {
-                       alert(data.message);
-                   }
-               })
-               .catch(error => {
-                   console.error('Error deleting post:', error);
-                   alert('An error occurred while deleting the post.');
-               });
-       }
-   }
+        if (confirm('Are you sure you want to delete this post?')) {
+            const formData = new FormData();
+            
+            fetch(`/delete_post/${postId}/`, {  // Note the trailing slash
+                method: 'POST',  // Change from DELETE to POST
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                credentials: 'same-origin',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    loadPosts(); // Reload posts after successful deletion
+                } else {
+                    alert(data.message || 'Failed to delete post');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting post:', error);
+                alert('An error occurred while deleting the post. Please try again.');
+            });
+        }
+    }
 
-   // Handle post submission
-   submitPostBtn.addEventListener('click', () => {
-       const content = postContent.value.trim();
-       if (!content) {
-           alert('Post content cannot be empty.');
-           return;
-       }
+   // Get CSRF token from the page
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-       console.log('Submitting post:', content); // Log the post content
+    // Handle post submission
+    submitPostBtn.addEventListener('click', () => {
+        const content = postContent.value.trim();
+        if (!content) {
+            alert('Post content cannot be empty.');
+            return;
+        }
 
-       const formData = new FormData();
-       formData.append('content', content);
+        console.log('Submitting post:', content);
 
-       fetch(createPostUrl, {
-           method: 'POST',
-           body: formData
-       })
-           .then(response => {
-               console.log('Create post response:', response); // Log the response
-               return response.json();
-           })
-           .then(data => {
-               console.log('Create post data:', data); // Log the response data
-               if (data.success) {
-                   postContent.value = ''; // Clear the input
-                   loadPosts(); // Reload posts
-               } else {
-                   alert(data.message);
-               }
-           })
-           .catch(error => {
-               console.error('Error creating post:', error);
-               alert('An error occurred while creating the post.');
-           });
-   });
+        // Create FormData object
+        const formData = new FormData();
+        formData.append('content', content);
+
+        fetch(createPostUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
+            body: formData,
+            credentials: 'same-origin'  // This is important for cookies/session
+        })
+        .then(response => {
+            if (!response.ok) {
+                // If the response wasn't ok, throw an error with the status
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Create post data:', data);
+            if (data.success) {
+                postContent.value = ''; // Clear the input
+                loadPosts(); // Reload posts
+            } else {
+                alert(data.message || 'Failed to create post');
+            }
+        })
+        .catch(error => {
+            console.error('Error creating post:', error);
+            alert('An error occurred while creating the post. Please try again.');
+        });
+    });
 
    // Handle post submission on Enter key press
    postContent.addEventListener('keypress', function(event) {

@@ -639,6 +639,15 @@
                         'rotateY(0deg)' : 'rotateY(180deg)';
                 });
             });
+
+            // Add click handlers for buttons to prevent card flip
+            const cardButtons = document.querySelectorAll('.card-btn');
+            cardButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Prevent event from bubbling up to card
+                    // Add your button click logic here
+                });
+            });
         });
     </script>
 </body>
