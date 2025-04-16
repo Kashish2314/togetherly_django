@@ -66,12 +66,25 @@ def signup(request):
 
 @login_required
 def profile(request):
-    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+    user_profile, created = UserProfile.objects.get_or_create(
+        user=request.user,
+        defaults={
+            'name': f"{request.user.first_name} {request.user.last_name}".strip(),
+            'username': request.user.username,
+            'email': request.user.email,
+        }
+    )
+    
+    # Get post count for the user
+    post_count = Post.objects.filter(user=request.user).count()
+    
     skills = [s.strip() for s in user_profile.skills.split(',')] if user_profile.skills else []
+    
     return render(request, 'users/userprofile.html', {
         'user': request.user,
         'user_profile': user_profile,
         'skills': skills,
+        'post_count': post_count,  # Add post count to context
     })
 
 
@@ -79,14 +92,32 @@ def profile(request):
 def update_profile(request):
     if request.method == 'POST':
         user_profile, created = UserProfile.objects.get_or_create(user=request.user)
-        user_profile.name = request.POST.get('name')
-        user_profile.username = request.POST.get('username')
-        user_profile.email = request.POST.get('email')
-        user_profile.bio = request.POST.get('bio')
-        user_profile.skills = request.POST.get('skills')
+        
+        # Update UserProfile fields
+        user_profile.name = request.POST.get('name', '').strip()
+        user_profile.username = request.POST.get('username', '').strip()
+        user_profile.email = request.POST.get('email', '').strip()
+        user_profile.bio = request.POST.get('bio', '').strip()
+        user_profile.skills = request.POST.get('skills', '').strip()
         user_profile.save()
+        
+        # Update User model fields as well
+        user = request.user
+        if ' ' in user_profile.name:
+            first_name, last_name = user_profile.name.rsplit(' ', 1)
+            user.first_name = first_name
+            user.last_name = last_name
+        else:
+            user.first_name = user_profile.name
+            user.last_name = ''
+        
+        user.username = user_profile.username
+        user.email = user_profile.email
+        user.save()
+        
         messages.success(request, 'Profile updated successfully!')
         return redirect('profile')
+    
     messages.error(request, 'Invalid request.')
     return redirect('profile')
 
@@ -113,6 +144,9 @@ def create_post(request):
             
             post = Post.objects.create(user=request.user, content=content)
             
+            # Get updated post count
+            post_count = Post.objects.filter(user=request.user).count()
+            
             return JsonResponse({
                 'success': True,
                 'message': 'Post created successfully!',
@@ -122,7 +156,8 @@ def create_post(request):
                     'timestamp': post.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
                     'username': request.user.username,
                     'user_id': request.user.id
-                }
+                },
+                'post_count': post_count  # Add post count to response
             })
         except Exception as e:
             return JsonResponse({
@@ -150,13 +185,19 @@ def get_posts(request):
 
 @login_required
 def delete_post(request, post_id):
-    if request.method == 'POST':  # Change from DELETE to POST
+    if request.method == 'POST':
         post = get_object_or_404(Post, id=post_id)
         if post.user != request.user:
             return JsonResponse({'success': False, 'message': 'You can only delete your own posts.'}, status=403)
         try:
             post.delete()
-            return JsonResponse({'success': True, 'message': 'Post deleted successfully!'})
+            # Get updated post count
+            post_count = Post.objects.filter(user=request.user).count()
+            return JsonResponse({
+                'success': True, 
+                'message': 'Post deleted successfully!',
+                'post_count': post_count
+            })
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
     return JsonResponse({'success': False, 'message': 'Invalid request method.'}, status=405)

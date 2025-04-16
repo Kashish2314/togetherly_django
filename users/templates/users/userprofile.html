@@ -102,7 +102,7 @@
                 <div class="stat-label">Connections</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">0</div>
+                <div class="stat-number">{{ post_count }}</div>
                 <div class="stat-label">Posts</div>
             </div>
             <div class="stat-card">
@@ -137,7 +137,7 @@
             </div>
         </div>
 
-        <!-- Edit Profile Modal (hidden by default, shown with JS) -->
+        <!-- Edit Profile Modal -->
         <div class="modal" id="editProfileModal" style="display:none;">
             <div class="modal-content">
                 <div class="modal-header">
@@ -148,23 +148,27 @@
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="editName">Name</label>
-                        <input type="text" id="editName" name="name" value="{{ user_profile.name }}">
+                        <input type="text" id="editName" name="name" 
+                            value="{{ user_profile.name|default:user.get_full_name|default:user.username }}">
                     </div>
                     <div class="form-group">
                         <label for="editUsername">Username</label>
-                        <input type="text" id="editUsername" name="username" value="{{ user_profile.username }}">
+                        <input type="text" id="editUsername" name="username" 
+                            value="{{ user_profile.username|default:user.username }}">
                     </div>
                     <div class="form-group">
                         <label for="editEmail">Email</label>
-                        <input type="email" id="editEmail" name="email" value="{{ user_profile.email }}">
+                        <input type="email" id="editEmail" name="email" 
+                            value="{{ user_profile.email|default:user.email }}">
                     </div>
                     <div class="form-group">
                         <label for="editBioText">Bio</label>
-                        <textarea id="editBioText" name="bio">{{ user_profile.bio }}</textarea>
+                        <textarea id="editBioText" name="bio">{{ user_profile.bio|default:"" }}</textarea>
                     </div>
                     <div class="form-group">
                         <label for="editSkills">Skills (comma-separated)</label>
-                        <input type="text" id="editSkills" name="skills" value="{{ user_profile.skills }}">
+                        <input type="text" id="editSkills" name="skills" 
+                            value="{{ user_profile.skills|default:"" }}">
                     </div>
                     <div class="modal-footer">
                         <button class="btn" id="cancelEdit" type="button">Cancel</button>
