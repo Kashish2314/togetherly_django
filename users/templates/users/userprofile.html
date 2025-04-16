@@ -78,7 +78,7 @@
             <div class="profile-info">
                 <div class="profile-picture-container">
                     <div class="profile-picture">
-                        <img id="profileImage" src="https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg" alt="Profile picture">
+                        <img id="profileImage" src="{{ user_profile.get_profile_picture_url }}" alt="Profile picture">
                     </div>
                 </div>
                 <div class="profile-actions">
@@ -144,22 +144,26 @@
                     <h2 class="modal-title">Edit Profile</h2>
                     <button class="close-modal" id="closeModal" type="button">&times;</button>
                 </div>
-                <form id="profileForm" method="post" action="{% url 'update_profile' %}">
+                <form id="profileForm" method="post" action="{% url 'update_profile' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="form-group">
+                        <label for="profilePicture">Profile Picture</label>
+                        <div class="profile-picture-upload">
+                            <img id="previewImage" src="{{ user_profile.get_profile_picture_url }}" alt="Profile preview">
+                            <input type="file" id="profilePicture" name="profile_picture" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label for="editName">Name</label>
-                        <input type="text" id="editName" name="name" 
-                            value="{{ user_profile.name|default:user.get_full_name|default:user.username }}">
+                        <input type="text" id="editName" name="name" value="{{ user_profile.name|default:user.get_full_name|default:user.username }}">
                     </div>
                     <div class="form-group">
                         <label for="editUsername">Username</label>
-                        <input type="text" id="editUsername" name="username" 
-                            value="{{ user_profile.username|default:user.username }}">
+                        <input type="text" id="editUsername" name="username" value="{{ user_profile.username|default:user.username }}">
                     </div>
                     <div class="form-group">
                         <label for="editEmail">Email</label>
-                        <input type="email" id="editEmail" name="email" 
-                            value="{{ user_profile.email|default:user.email }}">
+                        <input type="email" id="editEmail" name="email" value="{{ user_profile.email|default:user.email }}">
                     </div>
                     <div class="form-group">
                         <label for="editBioText">Bio</label>
@@ -167,8 +171,7 @@
                     </div>
                     <div class="form-group">
                         <label for="editSkills">Skills (comma-separated)</label>
-                        <input type="text" id="editSkills" name="skills" 
-                            value="{{ user_profile.skills|default:"" }}">
+                        <input type="text" id="editSkills" name="skills" value="{{ user_profile.skills|default:"" }}">
                     </div>
                     <div class="modal-footer">
                         <button class="btn" id="cancelEdit" type="button">Cancel</button>

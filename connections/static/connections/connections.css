@@ -445,6 +445,10 @@ button:hover {
     background-color: transparent;
     color: var(--text-color);
     border: 1px solid var(--border-color);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Back card styles */
@@ -598,4 +602,128 @@ button:hover {
     .profile-card {
         width: 280px;
     }
+}
+
+.request-sent {
+    background-color: #4CAF50 !important;
+    cursor: default !important;
+}
+
+.no-suggestions {
+    text-align: center;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    margin: 20px;
+}
+
+.profile-card {
+    perspective: 1000px;
+}
+
+.card-inner.flipped {
+    transform: rotateY(180deg);
+}
+
+.pending-requests-section {
+    margin: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.pending-requests {
+    display: grid;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.pending-request-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.request-user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.request-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #7c6cf9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.request-details h4 {
+    margin: 0;
+    color: #333;
+}
+
+.request-details p {
+    margin: 5px 0 0;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.request-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.accept-btn, .reject-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.accept-btn {
+    background-color: #7c6cf9;
+    color: white;
+}
+
+.accept-btn:hover {
+    background-color: #6a5cd9;
+}
+
+.reject-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.reject-btn:hover {
+    background-color: #c82333;
+}
+
+/* Button states */
+.card-btn.request-sent {
+    background-color: #28a745 !important;
+    cursor: default;
+}
+
+.card-btn.connected {
+    background-color: #6c757d !important;
+    cursor: default;
+}
+
+.card-btn.request-sent:hover,
+.card-btn.connected:hover {
+    transform: none;
+}
+
+.card-btn.request-sent:hover {
+    transform: none !important;
 }

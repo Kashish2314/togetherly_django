@@ -93,27 +93,17 @@ def update_profile(request):
     if request.method == 'POST':
         user_profile, created = UserProfile.objects.get_or_create(user=request.user)
         
-        # Update UserProfile fields
-        user_profile.name = request.POST.get('name', '').strip()
-        user_profile.username = request.POST.get('username', '').strip()
-        user_profile.email = request.POST.get('email', '').strip()
-        user_profile.bio = request.POST.get('bio', '').strip()
-        user_profile.skills = request.POST.get('skills', '').strip()
+        # Handle profile picture upload
+        if 'profile_picture' in request.FILES:
+            user_profile.profile_picture = request.FILES['profile_picture']
+        
+        # Update other fields
+        user_profile.name = request.POST.get('name')
+        user_profile.username = request.POST.get('username')
+        user_profile.email = request.POST.get('email')
+        user_profile.bio = request.POST.get('bio')
+        user_profile.skills = request.POST.get('skills')
         user_profile.save()
-        
-        # Update User model fields as well
-        user = request.user
-        if ' ' in user_profile.name:
-            first_name, last_name = user_profile.name.rsplit(' ', 1)
-            user.first_name = first_name
-            user.last_name = last_name
-        else:
-            user.first_name = user_profile.name
-            user.last_name = ''
-        
-        user.username = user_profile.username
-        user.email = user_profile.email
-        user.save()
         
         messages.success(request, 'Profile updated successfully!')
         return redirect('profile')
@@ -152,7 +142,8 @@ def create_post(request):
                     'content': post.content,
                     'timestamp': post.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
                     'username': request.user.username,
-                    'user_id': request.user.id
+                    'user_id': request.user.id,
+                    'profile_picture_url': request.user.userprofile.get_profile_picture_url()
                 }
             })
         except Exception as e:
@@ -166,6 +157,7 @@ def create_post(request):
         'message': 'Invalid request method.'
     }, status=405)
 
+@login_required
 def get_posts(request):
     posts = Post.objects.all().order_by('-timestamp')
     post_list = []
@@ -175,7 +167,8 @@ def get_posts(request):
             'content': post.content,
             'timestamp': post.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
             'username': post.user.username,
-            'user_id': post.user.id
+            'user_id': post.user.id,
+            'profile_picture_url': post.user.userprofile.get_profile_picture_url()
         })
     return JsonResponse({'success': True, 'posts': post_list})
 

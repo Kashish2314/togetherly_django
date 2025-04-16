@@ -110,26 +110,37 @@ document.addEventListener('DOMContentLoaded', function() {
 
    // Function to create a post element
     function createPostElement(post) {
-       const isCurrentUser = post.user_id === currentUserId;
+       const isCurrentUser = post.user_id === parseInt(document.getElementById('currentUserId').value);
         const postElement = document.createElement('div');
         postElement.className = 'post';
         postElement.id = `post-${post.id}`;
         
         postElement.innerHTML = `
             <div class="post-header">
-                <div class="post-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="post-info">
-                    <div class="post-author">${post.username}</div>
-                   <div class="post-time">${formatTimestamp(post.timestamp)}</div>
+                <div class="post-user">
+                    <div class="post-avatar">
+                        <img src="${post.profile_picture_url || 'https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg'}" 
+                             alt="${post.username}"
+                             loading="lazy">
+                    </div>
+                    <div class="post-info">
+                        <span class="post-username">${post.username}</span>
+                        <div class="post-timestamp">
+                            <span>${new Date(post.timestamp).toLocaleString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}</span>
+                        </div>
+                    </div>
                 </div>
                 ${isCurrentUser ? `
                     <div class="post-actions">
-                        <button class="edit-post-btn" onclick="startEditPost(${post.id})">
+                        <button class="edit-post-btn" onclick="startEditPost(${post.id})" title="Edit post">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="delete-post-btn" onclick="deletePost(${post.id})">
+                        <button class="delete-post-btn" onclick="deletePost(${post.id})" title="Delete post">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -139,10 +150,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 ${post.content}
             </div>
             <div class="post-edit-form" id="post-edit-${post.id}" style="display: none;">
-                <textarea class="edit-content">${post.content}</textarea>
+                <textarea class="edit-content" placeholder="What's on your mind?">${post.content}</textarea>
                 <div class="edit-actions">
-                    <button class="save-edit-btn" onclick="saveEdit(${post.id})">Save</button>
-                    <button class="cancel-edit-btn" onclick="cancelEdit(${post.id})">Cancel</button>
+                    <button class="save-edit-btn" onclick="saveEdit(${post.id})">
+                        <i class="fas fa-check"></i> Save
+                    </button>
+                    <button class="cancel-edit-btn" onclick="cancelEdit(${post.id})">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
                 </div>
             </div>
         `;
@@ -276,21 +291,28 @@ document.addEventListener('DOMContentLoaded', function() {
                                <div class="post-header">
                                    <div class="post-user">
                                        <div class="post-avatar">
-                                           <i class="fas fa-user"></i>
+                                           <img src="${post.profile_picture_url || 'https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg'}" 
+                                                alt="${post.username}"
+                                                loading="lazy">
                                        </div>
                                        <div class="post-info">
                                            <span class="post-username">${post.username}</span>
                                            <div class="post-timestamp">
-                                               <span>${new Date(post.timestamp).toLocaleString()}</span>
+                                               <span>${new Date(post.timestamp).toLocaleString('en-US', {
+                                                   month: 'short',
+                                                   day: 'numeric',
+                                                   hour: '2-digit',
+                                                   minute: '2-digit'
+                                               })}</span>
                                            </div>
                                        </div>
                                    </div>
                                    ${isCurrentUser ? `
                                        <div class="post-actions">
-                                           <button class="edit-post-btn" onclick="startEditPost(${post.id})">
+                                           <button class="edit-post-btn" onclick="startEditPost(${post.id})" title="Edit post">
                                                <i class="fas fa-edit"></i>
                                            </button>
-                                           <button class="delete-post-btn" onclick="deletePost(${post.id})">
+                                           <button class="delete-post-btn" onclick="deletePost(${post.id})" title="Delete post">
                                                <i class="fas fa-trash"></i>
                                            </button>
                                        </div>
@@ -298,10 +320,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                </div>
                                <div class="post-content" id="post-content-${post.id}">${post.content}</div>
                                <div class="post-edit-form" id="post-edit-${post.id}" style="display: none;">
-                                   <textarea class="edit-content">${post.content}</textarea>
+                                   <textarea class="edit-content" placeholder="What's on your mind?">${post.content}</textarea>
                                    <div class="edit-actions">
-                                       <button class="save-edit-btn" onclick="saveEdit(${post.id})">Save</button>
-                                       <button class="cancel-edit-btn" onclick="cancelEdit(${post.id})">Cancel</button>
+                                       <button class="save-edit-btn" onclick="saveEdit(${post.id})">
+                                           <i class="fas fa-check"></i> Save
+                                       </button>
+                                       <button class="cancel-edit-btn" onclick="cancelEdit(${post.id})">
+                                           <i class="fas fa-times"></i> Cancel
+                                       </button>
                                    </div>
                                </div>
                            `;

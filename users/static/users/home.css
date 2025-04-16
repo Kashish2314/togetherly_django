@@ -394,18 +394,17 @@ button:hover {
 }
 
 .post-avatar {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background: #ddd;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    overflow: hidden;
+    margin-right: 10px;
 }
 
-.post-avatar i {
-    font-size: 1.5rem;
-    color: #1a1a1abc;
+.post-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .post-textbox {
@@ -431,8 +430,16 @@ button:hover {
     display: flex;
     gap: 10px;
     margin-left: auto;
+    width: 100%;
+    align-items:end;
+    justify-content: flex-end;
 }
 
+.post-action{
+    cursor: pointer;
+}
+
+    
 .edit-post-btn,
 .delete-post-btn {
     background: none;
@@ -441,6 +448,11 @@ button:hover {
     padding: 5px;
     color: #666;
     transition: color 0.2s;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .edit-post-btn:hover {
@@ -461,31 +473,21 @@ button:hover {
 .post-user {
     display: flex;
     align-items: center;
-    gap: 10px;
+}
+
+.post-info {
+    display: flex;
+    flex-direction: column;
 }
 
 .post-username {
-    font-weight: 600;
-    color: var(--primary-color);
-    font-size: 1.5rem;
-    line-height:3.5rem;
+    font-weight: bold;
+    color: #333;
 }
 
 .post-timestamp {
-    display: flex;
-    flex-direction: row;
-    gap: 40px;
-    font-size: 0.9em;
+    font-size: 0.8em;
     color: #666;
-    margin-top: 1.4rem;
-}
-
-.post-date {
-    font-size: 0.8em;
-}
-
-.post-time {
-    font-size: 0.8em;
 }
 
 .post-content {
@@ -873,5 +875,208 @@ button:hover {
 .cancel-edit-btn {
     background-color: #ddd;
     color: #333;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #7c6cf9;
+}
+
+/* Posts Feed Styling */
+.posts-feed {
+    margin-top: 20px;
+}
+
+.post {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.post:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.post-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.post-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #7c6cf9;
+    box-shadow: 0 2px 8px rgba(124, 108, 249, 0.3);
+    transition: transform 0.2s;
+}
+
+.post-avatar:hover {
+    transform: scale(1.05);
+}
+
+.post-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: filter 0.3s;
+}
+
+.post-avatar img:hover {
+    filter: brightness(1.1);
+}
+
+.post-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.post-username {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 1.1em;
+    margin-bottom: 2px;
+}
+
+.post-timestamp {
+    font-size: 0.85em;
+    color: #7f8c8d;
+}
+
+.post-content {
+    color: #34495e;
+    line-height: 1.6;
+    margin: 15px 0;
+    font-size: 1.05em;
+}
+
+.post-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.edit-post-btn,
+.delete-post-btn {
+    background: none;
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.edit-post-btn {
+    color: #7c6cf9;
+}
+
+.delete-post-btn {
+    color: #e74c3c;
+}
+
+.edit-post-btn:hover {
+    background-color: rgba(124, 108, 249, 0.1);
+    transform: scale(1.1);
+}
+
+.delete-post-btn:hover {
+    background-color: rgba(231, 76, 60, 0.1);
+    transform: scale(1.1);
+}
+
+.post-edit-form {
+    margin-top: 15px;
+}
+
+.post-edit-form textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    border: 2px solid #7c6cf9;
+    border-radius: 8px;
+    resize: vertical;
+    font-size: 1em;
+    transition: border-color 0.3s;
+}
+
+.post-edit-form textarea:focus {
+    outline: none;
+    border-color: #6a5cd9;
+}
+
+.edit-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.save-edit-btn,
+.cancel-edit-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.save-edit-btn {
+    background-color: #7c6cf9;
+    color: white;
+}
+
+.save-edit-btn:hover {
+    background-color: #6a5cd9;
+    transform: translateY(-1px);
+}
+
+.cancel-edit-btn {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+.cancel-edit-btn:hover {
+    background-color: #d0d0d0;
+    transform: translateY(-1px);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.6;
+    }
 }
 

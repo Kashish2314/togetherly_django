@@ -1,4 +1,5 @@
 {% load static %}
+{% csrf_token %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,12 +29,12 @@
             </div>
         </div>
         <div class="nav-links">
-            {% if user.is_authenticated %}
+            {% if request.user.is_authenticated %}
                 <div class="nav-item">
                     <a href="{% url 'home' %}"><i class="fas fa-home"></i> Home</a>
                 </div>
                 <div class="nav-item">
-                    <a href="{% url 'profile' %}"><i class="fas fa-user"></i> {{ user.first_name|default:user.username }} </a>
+                    <a href="{% url 'profile' %}"><i class="fas fa-user"></i> {{ request.user.first_name|default:request.user.username }} </a>
                 </div>
                 <div class="nav-item">
                     <a href="{% url 'messaging' %}"><i class="fas fa-envelope"></i> Messages</a>
@@ -44,7 +45,6 @@
                 <div class="nav-item">
                     <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </div>
-                
             {% else %}
                 <div class="nav-item">
                     <a href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i> Login</a>
@@ -65,524 +65,97 @@
         <h2 class="section-title">Find and connect with professionals</h2>
         <div class="professionals-section" style="background-color: rgba(128, 128, 128, 0.195);">
             <div class="cards-container">
-                <!-- Card 1 -->
+                {% if pending_received %}
+                <div class="pending-requests-section">
+                    <h3>Pending Connection Requests</h3>
+                    <div class="pending-requests">
+                        {% for request in pending_received %}
+                        <div class="pending-request-card">
+                            <div class="request-user-info">
+                                <div class="request-avatar">
+                                    <i class="fas fa-user"></i>
+                            </div>
+                                <div class="request-details">
+                                    <h4>{{ request.sender.get_full_name|default:request.sender.username }}</h4>
+                                    <p>{{ request.sender.userprofile.bio|truncatechars:100|default:"" }}</p>
+                                </div>
+                            </div>
+                            <div class="request-actions">
+                                <button class="accept-btn" data-request-id="{{ request.id }}">Accept</button>
+                                <button class="reject-btn" data-request-id="{{ request.id }}">Reject</button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                                </div>
+                            </div>
+                {% endif %}
+                {% for user_profile in suggested_users %}
                 <div class="profile-card">
                     <div class="card-inner">
-                        <!-- Front of Card 1 -->
+                        <!-- Front of Card -->
                         <div class="card-front">
                             <div class="card-header card-header-1"></div>
                             <div class="profile-image">
-                                <img src="https://as1.ftcdn.net/jpg/03/39/45/96/1000_F_339459697_XAFacNQmwnvJRqe1Fe9VOptPWMUxlZP8.jpg" alt="Sarah Johnson">
+                                <img src="{{ user_profile.userprofile.get_profile_picture_url }}" alt="{{ user_profile.username }}">
                             </div>
                             <div class="profile-info">
-                                <h3 class="profile-name">Sarah Johnson</h3>
-                                <p class="profile-title">Product Manager</p>
-                                <p class="profile-company">TechVision Inc.</p>
+                                <h3 class="profile-name">{{ user_profile.get_full_name|default:user_profile.username }}</h3>
+                                <p class="profile-title">{{ user_profile.userprofile.bio|default:"" }}</p>
+                                <p class="profile-company">{{ user_profile.userprofile.skills|default:"" }}</p>
                                 <div class="profile-location">
-                                    <span>📍</span> San Francisco, CA
+                                    <span>📍</span> {{ user_profile.userprofile.location|default:"Location not specified" }}
                                 </div>
-                                <p class="connections">732 connections</p>
                                 <div class="card-actions">
-                                    <button class="card-btn card-btn-primary">
+                                    {% if user_profile.id in pending_sent_ids %}
+                                        <button class="card-btn card-btn-primary request-sent" disabled>
+                                            <span>✓</span> Request Sent
+                                    </button>
+                                    {% elif user_profile.id in connected_users %}
+                                        <button class="card-btn card-btn-primary connected" disabled>
+                                            <span>✓</span> Connected
+                                    </button>
+                                    {% else %}
+                                        <button class="card-btn card-btn-primary connect-btn" data-user-id="{{ user_profile.id }}">
                                         <span>👥</span> Connect
                                     </button>
-                                    <button class="card-btn card-btn-outline">
+                                    {% endif %}
+                                    <a href="{% url 'start_conversation' user_profile.id %}" class="card-btn card-btn-outline">
                                         <span>💬</span> Message
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         </div>
-                        <!-- Back of Card 1 -->
+                        <!-- Back of Card -->
                         <div class="card-back">
-                            <h3 class="about-title">About Sarah</h3>
+                            <h3 class="about-title">About {{ user_profile.first_name|default:user_profile.username }}</h3>
                             <div class="info-item">
                                 <div class="info-icon">💼</div>
                                 <div class="info-content">
-                                    <span class="info-label">Work</span>
-                                    <span class="info-value">Product Manager at TechVision Inc.</span>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-icon">🎓</div>
-                                <div class="info-content">
-                                    <span class="info-label">Education</span>
-                                    <span class="info-value">MIT</span>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-icon">📍</div>
-                                <div class="info-content">
-                                    <span class="info-label">Location</span>
-                                    <span class="info-value">San Francisco, CA</span>
+                                    <span class="info-label">Bio</span>
+                                    <span class="info-value">{{ user_profile.userprofile.bio|default:"No bio available" }}</span>
                                 </div>
                             </div>
                             <div class="skills-section">
-                                <h4 class="skills-title">Skills & Endorsements</h4>
+                                <h4 class="skills-title">Skills</h4>
                                 <div class="skills-container">
-                                    <span class="skill-tag">Product Management</span>
-                                    <span class="skill-tag">UX Design</span>
-                                    <span class="skill-tag">Agile</span>
-                                    <span class="skill-tag">Strategy</span>
+                                    {% if user_profile.userprofile.skills %}
+                                        {% for skill in user_profile.userprofile.skills.split %}
+                                            <span class="skill-tag">{{ skill }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="skill-tag">No skills listed</span>
+                                    {% endif %}
                                 </div>
                             </div>
                             <p class="flip-hint">Click card to flip back</p>
                         </div>
                     </div>
                 </div>
-
-                <!-- Card 2 -->
-                <div class="profile-card">
-                    <div class="card-inner">
-                        <!-- Front of Card 2 -->
-                        <div class="card-front">
-                            <div class="card-header card-header-2"></div>
-                            <div class="profile-image">
-                                <img src="https://as1.ftcdn.net/jpg/03/39/45/96/1000_F_339459697_XAFacNQmwnvJRqe1Fe9VOptPWMUxlZP8.jpg" alt="David Miller">
+                {% empty %}
+                <div class="no-suggestions">
+                    <p>No new connection suggestions at the moment.</p>
                             </div>
-                            <div class="profile-info">
-                                <h3 class="profile-name">David Miller</h3>
-                                <p class="profile-title">Marketing Director</p>
-                                <p class="profile-company">GlobalBrand</p>
-                                <div class="profile-location">
-                                    <span>📍</span> San Francisco, CA
-                                </div>
-                                <p class="connections">842 connections</p>
-                                <div class="card-actions">
-                                    <button class="card-btn card-btn-primary">
-                                        <span>👥</span> Connect
-                                    </button>
-                                    <button class="card-btn card-btn-outline">
-                                        <span>💬</span> Message
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Back of Card 2 -->
-                        <div class="card-back">
-                            <h3 class="about-title">About David</h3>
-                            <div class="info-item">
-                                <div class="info-icon">💼</div>
-                                <div class="info-content">
-                                    <span class="info-label">Work</span>
-                                    <span class="info-value">Marketing Director at GlobalBrand</span>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-icon">🎓</div>
-                                <div class="info-content">
-                                    <span class="info-label">Education</span>
-                                    <span class="info-value">Stanford University</span>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-icon">📍</div>
-                                <div class="info-content">
-                                    <span class="info-label">Location</span>
-                                    <span class="info-value">San Francisco, CA</span>
-                                </div>
-                            </div>
-                            <div class="skills-section">
-                                <h4 class="skills-title">Skills & Endorsements</h4>
-                                <div class="skills-container">
-                                    <span class="skill-tag">Leadership</span>
-                                    <span class="skill-tag">Strategic Planning</span>
-                                    <span class="skill-tag">Marketing</span>
-                                    <span class="skill-tag">Product Development</span>
-                                </div>
-                            </div>
-                            <p class="flip-hint">Click card to flip back</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="profile-card">
-                    <div class="card-inner">
-                        <!-- Front of Card 3 -->
-                        <div class="card-front">
-                            <div class="card-header card-header-3"></div>
-                            <div class="profile-image">
-                                <img src="https://as1.ftcdn.net/jpg/03/39/45/96/1000_F_339459697_XAFacNQmwnvJRqe1Fe9VOptPWMUxlZP8.jpg" alt="Michael Chen">
-                            </div>
-                            <div class="profile-info">
-                                <h3 class="profile-name">Michael Chen</h3>
-                                <p class="profile-title">Software Engineer</p>
-                                <p class="profile-company">TechGrow</p>
-                                <div class="profile-location">
-                                    <span>📍</span> Seattle, WA
-                                </div>
-                                <p class="connections">519 connections</p>
-                                <div class="card-actions">
-                                    <button class="card-btn card-btn-primary">
-                                        <span>👥</span> Connect
-                                    </button>
-                                    <button class="card-btn card-btn-outline">
-                                        <span>💬</span> Message
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Back of Card 3 -->
-                        <div class="card-back">
-                            <h3 class="about-title">About Michael</h3>
-                            <div class="info-item">
-                                <div class="info-icon">💼</div>
-                                <div class="info-content">
-                                    <span class="info-label">Work</span>
-                                    <span class="info-value">Software Engineer at TechGrow</span>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-icon">🎓</div>
-                                <div class="info-content">
-                                    <span class="info-label">Education</span>
-                                    <span class="info-value">University of Washington</span>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-icon">📍</div>
-                                <div class="info-content">
-                                    <span class="info-label">Location</span>
-                                    <span class="info-value">Seattle, WA</span>
-                                </div>
-                            </div>
-                            <div class="skills-section">
-                                <h4 class="skills-title">Skills & Endorsements</h4>
-                                <div class="skills-container">
-                                    <span class="skill-tag">JavaScript</span>
-                                    <span class="skill-tag">React</span>
-                                    <span class="skill-tag">Node.js</span>
-                                    <span class="skill-tag">Cloud Computing</span>
-                                </div>
-                            </div>
-                            <p class="flip-hint">Click card to flip back</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Card 4 -->
-                <div class="profile-card">
-                    <div class="card-inner">
-                        <!-- Front of Card 1 -->
-                        <div class="card-front">
-                            <div class="card-header card-header-1"></div>
-                            <div class="profile-image">
-                                <img src="https://as1.ftcdn.net/jpg/03/39/45/96/1000_F_339459697_XAFacNQmwnvJRqe1Fe9VOptPWMUxlZP8.jpg" alt="Sarah Johnson">
-                            </div>
-                            <div class="profile-info">
-                                <h3 class="profile-name">Sarah Johnson</h3>
-                                <p class="profile-title">Product Manager</p>
-                                <p class="profile-company">TechVision Inc.</p>
-                                <div class="profile-location">
-                                    <span>📍</span> San Francisco, CA
-                                </div>
-                                <p class="connections">732 connections</p>
-                                <div class="card-actions">
-                                    <button class="card-btn card-btn-primary">
-                                        <span>👥</span> Connect
-                                    </button>
-                                    <button class="card-btn card-btn-outline">
-                                        <span>💬</span> Message
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Back of Card 4 -->
-                        <div class="card-back">
-                            <h3 class="about-title">About Sarah</h3>
-                            <div class="info-item">
-                                <div class="info-icon">💼</div>
-                                <div class="info-content">
-                                    <span class="info-label">Work</span>
-                                    <span class="info-value">Product Manager at TechVision Inc.</span>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-icon">🎓</div>
-                                <div class="info-content">
-                                    <span class="info-label">Education</span>
-                                    <span class="info-value">MIT</span>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-icon">📍</div>
-                                <div class="info-content">
-                                    <span class="info-label">Location</span>
-                                    <span class="info-value">San Francisco, CA</span>
-                                </div>
-                            </div>
-                            <div class="skills-section">
-                                <h4 class="skills-title">Skills & Endorsements</h4>
-                                <div class="skills-container">
-                                    <span class="skill-tag">Product Management</span>
-                                    <span class="skill-tag">UX Design</span>
-                                    <span class="skill-tag">Agile</span>
-                                    <span class="skill-tag">Strategy</span>
-                                </div>
-                            </div>
-                            <p class="flip-hint">Click card to flip back</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="cards-container">
-                <!-- Card 1 -->
-                <div class="profile-card">
-                    <div class="card-inner">
-                        <!-- Front of Card 1 -->
-                        <div class="card-front">
-                            <div class="card-header card-header-1"></div>
-                            <div class="profile-image">
-                                <img src="https://as1.ftcdn.net/jpg/03/39/45/96/1000_F_339459697_XAFacNQmwnvJRqe1Fe9VOptPWMUxlZP8.jpg" alt="Sarah Johnson">
-                            </div>
-                            <div class="profile-info">
-                                <h3 class="profile-name">Sarah Johnson</h3>
-                                <p class="profile-title">Product Manager</p>
-                                <p class="profile-company">TechVision Inc.</p>
-                                <div class="profile-location">
-                                    <span>📍</span> San Francisco, CA
-                                </div>
-                                <p class="connections">732 connections</p>
-                                <div class="card-actions">
-                                    <button class="card-btn card-btn-primary">
-                                        <span>👥</span> Connect
-                                    </button>
-                                    <button class="card-btn card-btn-outline">
-                                        <span>💬</span> Message
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Back of Card 1 -->
-                        <div class="card-back">
-                            <h3 class="about-title">About Sarah</h3>
-                            <div class="info-item">
-                                <div class="info-icon">💼</div>
-                                <div class="info-content">
-                                    <span class="info-label">Work</span>
-                                    <span class="info-value">Product Manager at TechVision Inc.</span>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-icon">🎓</div>
-                                <div class="info-content">
-                                    <span class="info-label">Education</span>
-                                    <span class="info-value">MIT</span>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-icon">📍</div>
-                                <div class="info-content">
-                                    <span class="info-label">Location</span>
-                                    <span class="info-value">San Francisco, CA</span>
-                                </div>
-                            </div>
-                            <div class="skills-section">
-                                <h4 class="skills-title">Skills & Endorsements</h4>
-                                <div class="skills-container">
-                                    <span class="skill-tag">Product Management</span>
-                                    <span class="skill-tag">UX Design</span>
-                                    <span class="skill-tag">Agile</span>
-                                    <span class="skill-tag">Strategy</span>
-                                </div>
-                            </div>
-                            <p class="flip-hint">Click card to flip back</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 2 -->
-                <div class="profile-card">
-                    <div class="card-inner">
-                        <!-- Front of Card 2 -->
-                        <div class="card-front">
-                            <div class="card-header card-header-2"></div>
-                            <div class="profile-image">
-                                <img src="https://as1.ftcdn.net/jpg/03/39/45/96/1000_F_339459697_XAFacNQmwnvJRqe1Fe9VOptPWMUxlZP8.jpg" alt="David Miller">
-                            </div>
-                            <div class="profile-info">
-                                <h3 class="profile-name">David Miller</h3>
-                                <p class="profile-title">Marketing Director</p>
-                                <p class="profile-company">GlobalBrand</p>
-                                <div class="profile-location">
-                                    <span>📍</span> San Francisco, CA
-                                </div>
-                                <p class="connections">842 connections</p>
-                                <div class="card-actions">
-                                    <button class="card-btn card-btn-primary">
-                                        <span>👥</span> Connect
-                                    </button>
-                                    <button class="card-btn card-btn-outline">
-                                        <span>💬</span> Message
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Back of Card 2 -->
-                        <div class="card-back">
-                            <h3 class="about-title">About David</h3>
-                            <div class="info-item">
-                                <div class="info-icon">💼</div>
-                                <div class="info-content">
-                                    <span class="info-label">Work</span>
-                                    <span class="info-value">Marketing Director at GlobalBrand</span>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-icon">🎓</div>
-                                <div class="info-content">
-                                    <span class="info-label">Education</span>
-                                    <span class="info-value">Stanford University</span>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-icon">📍</div>
-                                <div class="info-content">
-                                    <span class="info-label">Location</span>
-                                    <span class="info-value">San Francisco, CA</span>
-                                </div>
-                            </div>
-                            <div class="skills-section">
-                                <h4 class="skills-title">Skills & Endorsements</h4>
-                                <div class="skills-container">
-                                    <span class="skill-tag">Leadership</span>
-                                    <span class="skill-tag">Strategic Planning</span>
-                                    <span class="skill-tag">Marketing</span>
-                                    <span class="skill-tag">Product Development</span>
-                                </div>
-                            </div>
-                            <p class="flip-hint">Click card to flip back</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="profile-card">
-                    <div class="card-inner">
-                        <!-- Front of Card 3 -->
-                        <div class="card-front">
-                            <div class="card-header card-header-3"></div>
-                            <div class="profile-image">
-                                <img src="https://as1.ftcdn.net/jpg/03/39/45/96/1000_F_339459697_XAFacNQmwnvJRqe1Fe9VOptPWMUxlZP8.jpg" alt="Michael Chen">
-                            </div>
-                            <div class="profile-info">
-                                <h3 class="profile-name">Michael Chen</h3>
-                                <p class="profile-title">Software Engineer</p>
-                                <p class="profile-company">TechGrow</p>
-                                <div class="profile-location">
-                                    <span>📍</span> Seattle, WA
-                                </div>
-                                <p class="connections">519 connections</p>
-                                <div class="card-actions">
-                                    <button class="card-btn card-btn-primary">
-                                        <span>👥</span> Connect
-                                    </button>
-                                    <button class="card-btn card-btn-outline">
-                                        <span>💬</span> Message
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Back of Card 3 -->
-                        <div class="card-back">
-                            <h3 class="about-title">About Michael</h3>
-                            <div class="info-item">
-                                <div class="info-icon">💼</div>
-                                <div class="info-content">
-                                    <span class="info-label">Work</span>
-                                    <span class="info-value">Software Engineer at TechGrow</span>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-icon">🎓</div>
-                                <div class="info-content">
-                                    <span class="info-label">Education</span>
-                                    <span class="info-value">University of Washington</span>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-icon">📍</div>
-                                <div class="info-content">
-                                    <span class="info-label">Location</span>
-                                    <span class="info-value">Seattle, WA</span>
-                                </div>
-                            </div>
-                            <div class="skills-section">
-                                <h4 class="skills-title">Skills & Endorsements</h4>
-                                <div class="skills-container">
-                                    <span class="skill-tag">JavaScript</span>
-                                    <span class="skill-tag">React</span>
-                                    <span class="skill-tag">Node.js</span>
-                                    <span class="skill-tag">Cloud Computing</span>
-                                </div>
-                            </div>
-                            <p class="flip-hint">Click card to flip back</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Card 4 -->
-                <div class="profile-card">
-                    <div class="card-inner">
-                        <!-- Front of Card 1 -->
-                        <div class="card-front">
-                            <div class="card-header card-header-1"></div>
-                            <div class="profile-image">
-                                <img src="https://as1.ftcdn.net/jpg/03/39/45/96/1000_F_339459697_XAFacNQmwnvJRqe1Fe9VOptPWMUxlZP8.jpg" alt="Sarah Johnson">
-                            </div>
-                            <div class="profile-info">
-                                <h3 class="profile-name">Sarah Johnson</h3>
-                                <p class="profile-title">Product Manager</p>
-                                <p class="profile-company">TechVision Inc.</p>
-                                <div class="profile-location">
-                                    <span>📍</span> San Francisco, CA
-                                </div>
-                                <p class="connections">732 connections</p>
-                                <div class="card-actions">
-                                    <button class="card-btn card-btn-primary">
-                                        <span>👥</span> Connect
-                                    </button>
-                                    <button class="card-btn card-btn-outline">
-                                        <span>💬</span> Message
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Back of Card 4 -->
-                        <div class="card-back">
-                            <h3 class="about-title">About Sarah</h3>
-                            <div class="info-item">
-                                <div class="info-icon">💼</div>
-                                <div class="info-content">
-                                    <span class="info-label">Work</span>
-                                    <span class="info-value">Product Manager at TechVision Inc.</span>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-icon">🎓</div>
-                                <div class="info-content">
-                                    <span class="info-label">Education</span>
-                                    <span class="info-value">MIT</span>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-icon">📍</div>
-                                <div class="info-content">
-                                    <span class="info-label">Location</span>
-                                    <span class="info-value">San Francisco, CA</span>
-                                </div>
-                            </div>
-                            <div class="skills-section">
-                                <h4 class="skills-title">Skills & Endorsements</h4>
-                                <div class="skills-container">
-                                    <span class="skill-tag">Product Management</span>
-                                    <span class="skill-tag">UX Design</span>
-                                    <span class="skill-tag">Agile</span>
-                                    <span class="skill-tag">Strategy</span>
-                                </div>
-                            </div>
-                            <p class="flip-hint">Click card to flip back</p>
-                        </div>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </div>

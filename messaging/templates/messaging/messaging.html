@@ -78,8 +78,13 @@
                     <li class="conversation-item">
                         <a href="{% url 'start_conversation' user.id %}" class="conversation-link">
                             <div class="avatar">
-                                <!-- You can add profile picture logic here if needed -->
-                                <div class="avatar-text">{{ user.username|make_list|slice:":2"|join:""|upper }}</div>
+                                {% if user.userprofile.get_profile_picture_url %}
+                                    <div class="user-avatar">
+                                        <img src="{{ user.userprofile.get_profile_picture_url }}" alt="{{ user.username }}">
+                                    </div>
+                                {% else %}
+                                    <div class="avatar-text">{{ user.username|make_list|slice:":2"|join:""|upper }}</div>
+                                {% endif %}
                             </div>
                             <div class="conversation-content">
                                 <div class="name">
@@ -92,11 +97,7 @@
                                     </span>
                                 </div>
                                 <div class="preview">
-                                    {% if user.userprofile.bio %}
-                                        {{ user.userprofile.bio|truncatechars:30 }}
-                                    {% else %}
                                         Click to start chatting
-                                    {% endif %}
                                 </div>
                             </div>
                         </a>
