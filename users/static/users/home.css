@@ -888,27 +888,31 @@ button:hover {
 /* Posts Feed Styling */
 .posts-feed {
     margin-top: 20px;
+    color: var(--text-color);
 }
 
 .post {
-    background: white;
+    background: var(--bg-color);
     border-radius: 15px;
     padding: 20px;
     margin-bottom: 20px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s, box-shadow 0.2s;
     animation: fadeIn 0.5s ease-out;
+    color: var(--text-color);
 }
 
 .post:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    color: var(--text-color);
 }
 
 .post-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    color: var(--text-color);
     margin-bottom: 15px;
 }
 
@@ -916,6 +920,7 @@ button:hover {
     display: flex;
     align-items: center;
     gap: 12px;
+    color: var(--text-color);
 }
 
 .post-avatar {
@@ -946,22 +951,23 @@ button:hover {
 .post-info {
     display: flex;
     flex-direction: column;
+    color: var(--text-color);
 }
 
 .post-username {
     font-weight: 600;
-    color: #2c3e50;
     font-size: 1.1em;
     margin-bottom: 2px;
+    color: var(--primary-color);
 }
 
 .post-timestamp {
     font-size: 0.85em;
-    color: #7f8c8d;
+    color: var(--text-color);
 }
 
 .post-content {
-    color: #34495e;
+    color: var(--text-color);
     line-height: 1.6;
     margin: 15px 0;
     font-size: 1.05em;

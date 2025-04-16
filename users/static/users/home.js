@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
    // Function to create a post element
     function createPostElement(post) {
-       const isCurrentUser = post.user_id === parseInt(document.getElementById('currentUserId').value);
+        const isCurrentUser = post.user_id === parseInt(document.getElementById('currentUserId').value);
         const postElement = document.createElement('div');
         postElement.className = 'post';
         postElement.id = `post-${post.id}`;
@@ -118,12 +118,12 @@ document.addEventListener('DOMContentLoaded', function() {
         postElement.innerHTML = `
             <div class="post-header">
                 <div class="post-user">
-                    <div class="post-avatar">
+                <div class="post-avatar">
                         <img src="${post.profile_picture_url || 'https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg'}" 
                              alt="${post.username}"
                              loading="lazy">
-                    </div>
-                    <div class="post-info">
+                </div>
+                <div class="post-info">
                         <span class="post-username">${post.username}</span>
                         <div class="post-timestamp">
                             <span>${new Date(post.timestamp).toLocaleString('en-US', {
