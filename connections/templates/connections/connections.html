@@ -96,7 +96,11 @@
                         <div class="card-front">
                             <div class="card-header card-header-1"></div>
                             <div class="profile-image">
-                                <img src="{{ user_profile.userprofile.get_profile_picture_url }}" alt="{{ user_profile.username }}">
+                                {% if user_profile.userprofile.get_profile_picture_url %}
+                                    <img src="{{ user_profile.userprofile.get_profile_picture_url }}" alt="{{ user_profile.userprofile.username }}">
+                                {% else %}
+                                    <img src="https://freesvg.org/img/abstract-user-flat-4.png" alt="{{ user.username }}">
+                                {% endif %}
                             </div>
                             <div class="profile-info">
                                 <h3 class="profile-name">{{ user_profile.get_full_name|default:user_profile.username }}</h3>

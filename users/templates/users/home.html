@@ -78,7 +78,11 @@
                 <div class="profile-cover"></div>
                 <div class="profile-info">
                     <div class="profile-avatar">
-                        <img src="{{ user.userprofile.get_profile_picture_url }}" alt="{{ user.username }}">
+                        {% if user.userprofile.get_profile_picture_url %}
+                            <img src="{{ user.userprofile.get_profile_picture_url }}" alt="{{ user.username }}">
+                        {% else %}
+                            <img src="https://freesvg.org/img/abstract-user-flat-4.png" alt="{{ user.username }}">
+                        {% endif %}
                     </div>
                     <h2 class="profile-name">
                         WELCOME, 
@@ -112,7 +116,11 @@
                 <input type="hidden" id="currentUserId" value="{{ user.id }}">
                 <div class="post-input">
                     <div class="post-avatar">
-                        <img src="{{ user.userprofile.get_profile_picture_url }}" alt="{{ user.username }}">
+                        {% if user.userprofile.get_profile_picture_url %}
+                            <img src="{{ user.userprofile.get_profile_picture_url }}" alt="{{ user.username }}">
+                        {% else %}
+                            <img src="https://freesvg.org/img/abstract-user-flat-4.png" alt="{{ user.username }}">
+                        {% endif %}
                     </div>
                     <div class="post-textbox">
                         <input type="text" id="postContent" placeholder="Share what you're working on...">

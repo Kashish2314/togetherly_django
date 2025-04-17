@@ -78,7 +78,11 @@
             <div class="profile-info">
                 <div class="profile-picture-container">
                     <div class="profile-picture">
-                        <img id="profileImage" src="{{ user_profile.get_profile_picture_url }}" alt="Profile picture">
+                        {% if user.userprofile.get_profile_picture_url %}
+                            <img src="{{ user.userprofile.get_profile_picture_url }}" alt="{{ user.username }}">
+                        {% else %}
+                            <img src="https://freesvg.org/img/abstract-user-flat-4.png" alt="{{ user.username }}">
+                        {% endif %} 
                     </div>
                 </div>
                 <div class="profile-actions">

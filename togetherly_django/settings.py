@@ -140,7 +140,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'kashishb1623@gmail.com'
-EMAIL_HOST_PASSWORD = '3438 2510 7581 5858'
+EMAIL_HOST_PASSWORD = 'ipow flmg fkin pult'
 
 # Optional: Add these for better email formatting
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
