@@ -66,28 +66,28 @@
     <script src="https://static.elfsight.com/platform/platform.js" async></script>
     <div class="elfsight-app-5377efc7-849e-41e6-b925-15c160b1ebd8" data-elfsight-app-lazy></div>
 
-   <div class="content container">
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <span>Messages</span>
-            </div>
+  <div class="content container">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span>Messages</span>
+        </div>
 
             <!-- All Users Chat List -->
-            <ul class="conversations">
+        <ul class="conversations">
                 {% for user in all_users %}
                     <li class="conversation-item">
                         <a href="{% url 'start_conversation' user.id %}" class="conversation-link">
-                            <div class="avatar">
+            <div class="avatar">
                                 {% if user.userprofile.get_profile_picture_url %}
                                     <div class="user-avatar">
                                         <img src="{{ user.userprofile.get_profile_picture_url }}" alt="{{ user.username }}">
-                                    </div>
+            </div>
                                 {% else %}
                                     <div class="avatar-text">{{ user.username|make_list|slice:":2"|join:""|upper }}</div>
                                 {% endif %}
-                            </div>
-                            <div class="conversation-content">
-                                <div class="name">
+            </div>
+            <div class="conversation-content">
+                <div class="name">
                                     <span>
                                         {% if user.userprofile.name %}
                                             {{ user.userprofile.name }}
@@ -95,58 +95,58 @@
                                             {{ user.username }}
                                         {% endif %}
                                     </span>
-                                </div>
+                </div>
                                 <div class="preview">
                                         Click to start chatting
-                                </div>
-                            </div>
+            </div>
+                </div>
                         </a>
-                    </li>
+            </li>
                 {% endfor %}
-            </ul>
-        </aside>
+        </ul>
+    </aside>
 
         <main class="chat-container" id="chat-container">
             {% if active_conversation %}
-                <div class="chat-header">
-                    <div class="chat-header-info">
-                        <div class="avatar">
+      <div class="chat-header">
+        <div class="chat-header-info">
+          <div class="avatar">
                                 <div class="avatar-text">{{ other_user.username|make_list|slice:":2"|join:""|upper }}</div>
-                        </div>
-                        <div>
+          </div>
+          <div>
                             <h3>{{ other_user.get_full_name|default:other_user.username }}</h3>
-                        </div>
-                    </div>
-                </div>
+          </div>
+        </div>
+      </div>
 
-                <div class="chat-messages" id="chat-messages">
+      <div class="chat-messages" id="chat-messages">
                     {% for message in messages %}
                         <div class="message {% if message.sender == user %}message-sent{% else %}message-received{% endif %}">
                             <p>{{ message.content }}</p>
                             <span class="message-time">{{ message.timestamp|date:"g:i A" }}</span>
-                        </div>
+        </div>
                     {% endfor %}
-                </div>
-
+        </div>
+        
                 <div class="chat-input-container" >
                     <form id="message-form" method="post" action="{% url 'conversation_detail' active_conversation.id %}" style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
                         {% csrf_token %}
                         <input type="text" name="content" class="chat-input" id="message-input" placeholder="Type a message...">
                         <button type="submit" class="send-btn" id="send-btn">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
+          <i class="fas fa-paper-plane"></i>
+        </button>
                     </form>
                 </div>
             {% else %}
                 <div class="no-conversation-selected" style="display: flex; justify-content: center; align-items: center; height: 100%;font-size: 1.5rem;">
                     <i class="fas fa-comments"></i>
                     <p>Select a conversation or start a new one</p>
-                </div>
+      </div>
             {% endif %}
-        </main>
-    </div>
+    </main>
+  </div>
 
-<script>
+  <script>
     
     document.querySelector('.search-btn').addEventListener('click', function() {
         document.querySelector('.search-input').focus();
@@ -173,7 +173,7 @@
         }
     }
     applySavedTheme();
-
+    
 
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     

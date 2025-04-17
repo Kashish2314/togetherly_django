@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponseForbidden
 from .models import User, UserProfile, Post
+from connections.models import Connection
+from django.db.models import Q
 
 def base(request):
     return render(request, 'users/base.html')
@@ -64,6 +66,7 @@ def signup(request):
         return redirect('login')
     return render(request, 'users/signup.html')
 
+
 @login_required
 def profile(request):
     user_profile, created = UserProfile.objects.get_or_create(
@@ -86,7 +89,6 @@ def profile(request):
         'skills': skills,
         'post_count': post_count,  # Add post count to context
     })
-
 
 @login_required
 def update_profile(request):

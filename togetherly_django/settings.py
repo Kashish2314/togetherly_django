@@ -35,6 +35,8 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'messaging.apps.MessagingConfig',
     'connections.apps.ConnectionsConfig',
+    'notifications.apps.NotificationsConfig',
+    'challenges.apps.ChallengesConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

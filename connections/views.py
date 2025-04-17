@@ -5,6 +5,12 @@ from django.db.models import Q
 from users.models import User, UserProfile
 from .models import Connection
 from messaging.models import Conversation
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+from notifications.models import Notification
+from django.db import models
+
+User = get_user_model()
 
 # Create your views here.
 @login_required
@@ -45,72 +51,43 @@ def connections(request):
 
 @login_required
 def send_connection_request(request, user_id):
-    if request.method == 'POST':
-        try:
-            receiver = User.objects.get(id=user_id)
-            
-            # Check if connection already exists
-            existing_connection = Connection.objects.filter(
-                (Q(sender=request.user, receiver=receiver) |
-                Q(sender=receiver, receiver=request.user))
-            ).first()
-            
-            if existing_connection:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Connection request already exists'
-                })
-            
-            # Create new connection request
-            Connection.objects.create(sender=request.user, receiver=receiver)
-            
-            return JsonResponse({
-                'success': True,
-                'message': 'Connection request sent successfully'
-            })
-        except User.DoesNotExist:
-            return JsonResponse({
-                'success': False,
-                'message': 'User not found'
-            })
+    receiver = get_object_or_404(User, id=user_id)
     
-    return JsonResponse({
-        'success': False,
-        'message': 'Invalid request method'
-    })
+    if request.user == receiver:
+        messages.error(request, "You cannot connect with yourself.")
+        return redirect('profile', username=receiver.username)
+        
+    connection, created = Connection.objects.get_or_create(
+        sender=request.user,
+        receiver=receiver,
+        defaults={'status': 'pending'}
+    )
+    
+    if created:
+        messages.success(request, f"Connection request sent to {receiver.username}")
+    else:
+        messages.info(request, f"Connection request already exists with {receiver.username}")
+    
+    return redirect('profile', username=receiver.username)
 
 @login_required
 def handle_connection_request(request, connection_id):
-    if request.method == 'POST':
-        try:
-            action = request.POST.get('action')
-            connection = Connection.objects.get(id=connection_id, receiver=request.user)
-            
-            if action == 'accept':
-                connection.status = 'accepted'
-                connection.save()
-                return JsonResponse({
-                    'success': True,
-                    'message': 'Connection request accepted'
-                })
-            elif action == 'reject':
-                connection.status = 'rejected'
-                connection.save()
-                return JsonResponse({
-                    'success': True,
-                    'message': 'Connection request rejected'
-                })
-            
-        except Connection.DoesNotExist:
-            return JsonResponse({
-                'success': False,
-                'message': 'Connection request not found'
-            })
+    connection = get_object_or_404(Connection, id=connection_id, receiver=request.user)
+    action = request.POST.get('action')
     
-    return JsonResponse({
-        'success': False,
-        'message': 'Invalid request method'
-    })
+    if action == 'accept':
+        connection.status = 'accepted'
+        connection.save()
+        messages.success(request, f"You are now connected with {connection.sender.username}")
+    elif action == 'reject':
+        connection.status = 'rejected'
+        connection.save()
+        messages.info(request, f"Connection request from {connection.sender.username} rejected")
+    
+    # Mark notification as read
+    Notification.objects.filter(connection=connection, recipient=request.user).update(is_read=True)
+    
+    return redirect('notifications')
 
 @login_required
 def start_conversation(request, user_id):
@@ -128,3 +105,21 @@ def start_conversation(request, user_id):
         conversation.participants.add(request.user, other_user)
     
     return redirect('conversation_detail', conversation_id=conversation.id)
+
+@login_required
+def connection_list(request):
+    connections = Connection.objects.filter(
+        status='accepted'
+    ).filter(
+        models.Q(sender=request.user) | models.Q(receiver=request.user)
+    )
+    return render(request, 'connections/connection_list.html', {'connections': connections})
+
+@login_required
+def get_connection_count(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    count = Connection.objects.filter(
+        models.Q(sender=user) | models.Q(receiver=user),
+        status='accepted'
+    ).count()
+    return JsonResponse({'count': count})

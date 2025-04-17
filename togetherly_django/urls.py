@@ -26,6 +26,7 @@ urlpatterns = [
     path('', include('users.urls')),
     path('messages', include('messaging.urls')),
     path('connect', include('connections.urls')),
+    path('challenges/', include('challenges.urls')),
     # Password Reset URLs
     path('password-reset/',
          auth_views.PasswordResetView.as_view(template_name='users/password_reset.html'),
@@ -39,6 +40,7 @@ urlpatterns = [
     path('password-reset-complete/',
          auth_views.PasswordResetCompleteView.as_view(template_name='users/password_reset_complete.html'),
          name='password_reset_complete'),
+    path('notifications/', include('notifications.urls')),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

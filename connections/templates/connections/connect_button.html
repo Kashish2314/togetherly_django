@@ -1,0 +1,33 @@
+{% if user.is_authenticated and user != profile_user %}
+    {% if connection_status == 'none' %}
+        <form action="{% url 'send_connection_request' profile_user.id %}" method="POST" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="card-btn card-btn-primary">
+                <span>👥</span> Connect
+            </button>
+        </form>
+    {% elif connection_status == 'pending_sent' %}
+        <button class="card-btn card-btn-outline" disabled>
+            <span>⏳</span> Request Sent
+        </button>
+    {% elif connection_status == 'pending_received' %}
+        <form action="{% url 'handle_connection_request' connection.id %}" method="POST" style="display: inline;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="accept">
+            <button type="submit" class="card-btn card-btn-primary">
+                <span>✅</span> Accept
+            </button>
+        </form>
+        <form action="{% url 'handle_connection_request' connection.id %}" method="POST" style="display: inline;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="reject">
+            <button type="submit" class="card-btn card-btn-outline">
+                <span>❌</span> Reject
+            </button>
+        </form>
+    {% elif connection_status == 'connected' %}
+        <button class="card-btn card-btn-primary" disabled>
+            <span>✓</span> Connected
+        </button>
+    {% endif %}
+{% endif %}

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Challenges</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+        }
+
+        .create-btn {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .create-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .challenges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .challenge-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+
+        .challenge-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .challenge-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .challenge-content {
+            padding: 20px;
+        }
+
+        .challenge-title {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .challenge-meta {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-difficulty {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .badge-category {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .challenge-description {
+            color: #666;
+            margin-bottom: 15px;
+            display: -webkit-box;
+            /* -webkit-line-clamp: 3; */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .challenge-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .participants {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .join-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .join-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .leave-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .leave-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .challenges-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Active Challenges</h1>
+            <a href="{% url 'create_challenge' %}" class="create-btn">Create Challenge</a>
+        </div>
+
+        {% if active_challenges %}
+            <div class="challenges-grid">
+                {% for challenge in active_challenges %}
+                    <div class="challenge-card">
+                        {% if challenge.image %}
+                            <img src="{{ challenge.image.url }}" alt="{{ challenge.title }}" class="challenge-image">
+                        {% endif %}
+                        <div class="challenge-content">
+                            <h2 class="challenge-title">{{ challenge.title }}</h2>
+                            <div class="challenge-meta">
+                                <span class="badge badge-difficulty">{{ challenge.get_difficulty_display }}</span>
+                                <span class="badge badge-category">{{ challenge.get_category_display }}</span>
+                            </div>
+                            <p class="challenge-description">{{ challenge.description }}</p>
+                            <div class="challenge-footer">
+                                <span class="participants">{{ challenge.participants_count }} participants</span>
+                                {% if challenge.id in user_participations %}
+                                    <form method="post" action="{% url 'challenge_detail' challenge.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="action-btn leave-btn">Leave Challenge</button>
+                                    </form>
+                                {% else %}
+                                    <a href="{% url 'challenge_detail' challenge.id %}" class="action-btn join-btn">Join Challenge</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <h2>No active challenges at the moment</h2>
+                <p>Be the first to create a challenge!</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html> 
