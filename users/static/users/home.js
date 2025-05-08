@@ -90,13 +90,45 @@ document.addEventListener('DOMContentLoaded', function() {
    // Load posts when page loads
    loadPosts();
 
+   // Image preview functionality
+   const postImage = document.getElementById('postImage');
+   const imagePreview = document.getElementById('imagePreview');
+   const previewImg = document.getElementById('previewImg');
+   const removeImage = document.getElementById('removeImage');
+
+   postImage.addEventListener('change', function(e) {
+       const file = e.target.files[0];
+       if (file) {
+           const reader = new FileReader();
+           reader.onload = function(e) {
+               previewImg.src = e.target.result;
+               imagePreview.style.display = 'block';
+           }
+           reader.readAsDataURL(file);
+       }
+   });
+
+   removeImage.addEventListener('click', function() {
+       postImage.value = '';
+       imagePreview.style.display = 'none';
+       previewImg.src = '';
+   });
+
    // Handle post submission
-   if (submitPostBtn) {
+   if (submitPostBtn && postContent) {
        submitPostBtn.addEventListener('click', function() {
            const content = postContent.value.trim();
-           if (!content) {
-               alert('Please enter some content for your post.');
+           const imageFile = postImage.files[0];
+           
+           if (!content && !imageFile) {
+               alert('Please enter some content or upload an image for your post.');
                return;
+           }
+
+           const formData = new FormData();
+           formData.append('content', content);
+           if (imageFile) {
+               formData.append('image', imageFile);
            }
 
            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
@@ -104,25 +136,24 @@ document.addEventListener('DOMContentLoaded', function() {
            fetch(createPostUrl, {
                method: 'POST',
                headers: {
-                   'Content-Type': 'application/x-www-form-urlencoded',
                    'X-CSRFToken': csrfToken
                },
-               body: `content=${encodeURIComponent(content)}`
+               body: formData
            })
            .then(response => response.json())
-        .then(data => {
-            if (data.success) {
+           .then(data => {
+               if (data.success) {
                    postContent.value = '';
+                   postImage.value = '';
+                   imagePreview.style.display = 'none';
+                   previewImg.src = '';
                    const newPost = createPostElement(data.post);
                    postsFeed.insertBefore(newPost, postsFeed.firstChild);
-                   if (data.post_count !== undefined) {
-                       updatePostCount(data.post_count);
-                   }
-                } else {
+               } else {
                    alert(data.message || 'Failed to create post.');
-            }
-        })
-        .catch(error => {
+               }
+           })
+           .catch(error => {
                console.error('Error:', error);
                alert('An error occurred while creating the post.');
            });
@@ -139,12 +170,12 @@ document.addEventListener('DOMContentLoaded', function() {
         postElement.innerHTML = `
             <div class="post-header">
                 <div class="post-user">
-                <div class="post-avatar">
+                    <div class="post-avatar">
                         <img src="${post.profile_picture_url || 'https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg'}" 
                              alt="${post.username}"
                              loading="lazy">
-                </div>
-                <div class="post-info">
+                    </div>
+                    <div class="post-info">
                         <span class="post-username">${post.username}</span>
                         <div class="post-timestamp">
                             <span>${new Date(post.timestamp).toLocaleString('en-US', {
@@ -169,6 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <div class="post-content" id="post-content-${post.id}">
                 ${post.content}
+                ${post.image_url ? `<img src="${post.image_url}" alt="Post image" style="max-width: 100%; border-radius: 8px; margin-top: 10px;">` : ''}
             </div>
             <div class="post-edit-form" id="post-edit-${post.id}" style="display: none;">
                 <textarea class="edit-content" placeholder="What's on your mind?">${post.content}</textarea>
@@ -179,6 +211,39 @@ document.addEventListener('DOMContentLoaded', function() {
                     <button class="cancel-edit-btn" onclick="cancelEdit(${post.id})">
                         <i class="fas fa-times"></i> Cancel
                     </button>
+                </div>
+            </div>
+            <div class="post-interactions">
+                <div class="interaction-buttons">
+                    <button class="like-button ${post.is_liked ? 'liked' : ''}" onclick="toggleLike(${post.id})">
+                        <i class="fas fa-heart"></i> <span class="likes-count">${post.likes_count}</span>
+                    </button>
+                    <button class="comment-button" onclick="toggleComments(${post.id})">
+                        <i class="fas fa-comment"></i> <span class="comments-count">${post.comments.length}</span>
+                    </button>
+                </div>
+                <div class="comments-section" id="comments-${post.id}" style="display: none;">
+                    <div class="comments-list" id="comments-list-${post.id}">
+                        ${post.comments.map(comment => `
+                            <div class="comment" id="comment-${comment.id}">
+                                <div class="comment-header">
+                                    <img src="${comment.profile_picture_url}" alt="${comment.username}" class="comment-avatar">
+                                    <span class="comment-username">${comment.username}</span>
+                                    <span class="comment-time">${new Date(comment.timestamp).toLocaleString()}</span>
+                                    ${comment.user_id === parseInt(document.getElementById('currentUserId').value) ? `
+                                        <button class="delete-comment" onclick="deleteComment(${comment.id})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    ` : ''}
+                                </div>
+                                <div class="comment-content">${comment.content}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="add-comment">
+                        <input type="text" placeholder="Write a comment..." id="comment-input-${post.id}">
+                        <button onclick="addComment(${post.id})">Post</button>
+                    </div>
                 </div>
             </div>
         `;
@@ -282,6 +347,130 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => {
            console.error('Error:', error);
            alert('An error occurred while deleting the post.');
+       });
+   };
+
+   window.toggleLike = function(postId) {
+       const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+       
+       fetch(`/like_post/${postId}/`, {
+           method: 'POST',
+           headers: {
+               'X-CSRFToken': csrfToken
+           }
+       })
+       .then(response => response.json())
+       .then(data => {
+           if (data.success) {
+               const likeButton = document.querySelector(`#post-${postId} .like-button`);
+               const likesCount = document.querySelector(`#post-${postId} .likes-count`);
+               
+               if (data.liked) {
+                   likeButton.classList.add('liked');
+               } else {
+                   likeButton.classList.remove('liked');
+               }
+               
+               likesCount.textContent = data.likes_count;
+           }
+       })
+       .catch(error => {
+           console.error('Error:', error);
+           alert('An error occurred while liking the post.');
+       });
+   };
+
+   window.toggleComments = function(postId) {
+       const commentsSection = document.getElementById(`comments-${postId}`);
+       commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
+   };
+
+   window.addComment = function(postId) {
+       const commentInput = document.getElementById(`comment-input-${postId}`);
+       const content = commentInput.value.trim();
+       
+       if (!content) {
+           alert('Please enter a comment.');
+           return;
+       }
+
+       const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+       
+       fetch(`/add_comment/${postId}/`, {
+           method: 'POST',
+           headers: {
+               'Content-Type': 'application/x-www-form-urlencoded',
+               'X-CSRFToken': csrfToken
+           },
+           body: `content=${encodeURIComponent(content)}`
+       })
+       .then(response => response.json())
+       .then(data => {
+           if (data.success) {
+               const commentsList = document.getElementById(`comments-list-${postId}`);
+               const commentElement = document.createElement('div');
+               commentElement.className = 'comment';
+               commentElement.id = `comment-${data.comment.id}`;
+               
+               commentElement.innerHTML = `
+                   <div class="comment-header">
+                       <img src="${data.comment.profile_picture_url}" alt="${data.comment.username}" class="comment-avatar">
+                       <span class="comment-username">${data.comment.username}</span>
+                       <span class="comment-time">${new Date(data.comment.timestamp).toLocaleString()}</span>
+                       <button class="delete-comment" onclick="deleteComment(${data.comment.id})">
+                           <i class="fas fa-trash"></i>
+                       </button>
+                   </div>
+                   <div class="comment-content">${data.comment.content}</div>
+               `;
+               
+               commentsList.insertBefore(commentElement, commentsList.firstChild);
+               commentInput.value = '';
+               
+               // Update comment count
+               const commentsCount = document.querySelector(`#post-${postId} .comments-count`);
+               commentsCount.textContent = parseInt(commentsCount.textContent) + 1;
+           } else {
+               alert(data.message || 'Failed to add comment.');
+           }
+       })
+       .catch(error => {
+           console.error('Error:', error);
+           alert('An error occurred while adding the comment.');
+       });
+   };
+
+   window.deleteComment = function(commentId) {
+       if (!confirm('Are you sure you want to delete this comment?')) {
+           return;
+       }
+
+       const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+       
+       fetch(`/delete_comment/${commentId}/`, {
+           method: 'POST',
+           headers: {
+               'X-CSRFToken': csrfToken
+           }
+       })
+       .then(response => response.json())
+       .then(data => {
+           if (data.success) {
+               const commentElement = document.getElementById(`comment-${commentId}`);
+               const postId = commentElement.closest('.post').id.split('-')[1];
+               
+               commentElement.remove();
+               
+               // Update comment count
+               const commentsCount = document.querySelector(`#post-${postId} .comments-count`);
+               commentsCount.textContent = parseInt(commentsCount.textContent) - 1;
+           } else {
+               alert(data.message || 'Failed to delete comment.');
+           }
+       })
+       .catch(error => {
+           console.error('Error:', error);
+           alert('An error occurred while deleting the comment.');
        });
    };
 

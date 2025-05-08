@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponseForbidden
-from .models import User, UserProfile, Post
+from .models import User, UserProfile, Post, Comment
 from connections.models import Connection
 from django.db.models import Q
 
@@ -137,13 +137,19 @@ def create_post(request):
     if request.method == 'POST':
         try:
             content = request.POST.get('content')
-            if not content:
+            image = request.FILES.get('image')
+            
+            if not content and not image:
                 return JsonResponse({
                     'success': False,
-                    'message': 'Post content cannot be empty.'
+                    'message': 'Post must have either content or an image.'
                 }, status=400)
             
-            post = Post.objects.create(user=request.user, content=content)
+            post = Post.objects.create(
+                user=request.user,
+                content=content,
+                image=image
+            )
             
             return JsonResponse({
                 'success': True,
@@ -151,10 +157,13 @@ def create_post(request):
                 'post': {
                     'id': post.id,
                     'content': post.content,
+                    'image_url': post.image.url if post.image else None,
                     'timestamp': post.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
                     'username': request.user.username,
                     'user_id': request.user.id,
-                    'profile_picture_url': request.user.userprofile.get_profile_picture_url()
+                    'profile_picture_url': request.user.userprofile.get_profile_picture_url(),
+                    'likes_count': 0,
+                    'comments_count': 0
                 }
             })
         except Exception as e:
@@ -176,10 +185,21 @@ def get_posts(request):
         post_list.append({
             'id': post.id,
             'content': post.content,
+            'image_url': post.image.url if post.image else None,
             'timestamp': post.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
             'username': post.user.username,
             'user_id': post.user.id,
-            'profile_picture_url': post.user.userprofile.get_profile_picture_url()
+            'profile_picture_url': post.user.userprofile.get_profile_picture_url(),
+            'likes_count': post.total_likes(),
+            'is_liked': request.user in post.likes.all(),
+            'comments': [{
+                'id': comment.id,
+                'content': comment.content,
+                'timestamp': comment.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                'username': comment.user.username,
+                'user_id': comment.user.id,
+                'profile_picture_url': comment.user.userprofile.get_profile_picture_url()
+            } for comment in post.comments.all()[:5]]  # Get last 5 comments
         })
     return JsonResponse({'success': True, 'posts': post_list})
 
@@ -240,3 +260,69 @@ def edit_post(request, post_id):
     
     return JsonResponse({'success': False, 'message': 'Invalid request method.'}, status=405)
 
+@login_required
+def like_post(request, post_id):
+    if request.method == 'POST':
+        post = get_object_or_404(Post, id=post_id)
+        if request.user in post.likes.all():
+            post.likes.remove(request.user)
+            liked = False
+        else:
+            post.likes.add(request.user)
+            liked = True
+        
+        return JsonResponse({
+            'success': True,
+            'likes_count': post.total_likes(),
+            'liked': liked
+        })
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'}, status=405)
+
+@login_required
+def add_comment(request, post_id):
+    if request.method == 'POST':
+        post = get_object_or_404(Post, id=post_id)
+        content = request.POST.get('content')
+        
+        if not content:
+            return JsonResponse({
+                'success': False,
+                'message': 'Comment content cannot be empty.'
+            }, status=400)
+        
+        comment = Comment.objects.create(
+            post=post,
+            user=request.user,
+            content=content
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'comment': {
+                'id': comment.id,
+                'content': comment.content,
+                'timestamp': comment.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                'username': comment.user.username,
+                'user_id': comment.user.id,
+                'profile_picture_url': comment.user.userprofile.get_profile_picture_url()
+            }
+        })
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'}, status=405)
+
+@login_required
+def delete_comment(request, comment_id):
+    if request.method == 'POST':
+        comment = get_object_or_404(Comment, id=comment_id)
+        if comment.user != request.user:
+            return JsonResponse({
+                'success': False,
+                'message': 'You can only delete your own comments.'
+            }, status=403)
+        
+        comment.delete()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'}, status=405)
+
+@login_required
+def job_search(request):
+    return render(request, 'users/job_search.html')

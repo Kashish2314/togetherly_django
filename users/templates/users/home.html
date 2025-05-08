@@ -110,6 +110,57 @@
                 </div>
             </div>
         </div>
+        <div class="job-search-sidebar" style="position: absolute; left: 20rem; bottom: 8rem;z-index: 100; background-color: var(--card-bg); width: 310px; border-radius: 1rem;">
+            <div class="job-search-card" style="background: var(--card-bg);
+                                                border-radius: 1rem;
+                                                padding: 1.5rem;
+                                                box-shadow: 0 4px 20px var(--shadow-color);
+                                                text-align: center;
+                                                transition: all 0.3s ease;
+                                                width: 310px;
+                                                backdrop-filter: blur(10px);
+                                                -webkit-backdrop-filter: blur(10px);
+                                                border: 1px solid var(--border-color);">
+                <div class="job-search-icon" style="font-size: 2.5rem;
+                                                    color: var(--primary-color);
+                                                    margin-bottom: 1rem;
+                                                    animation: pulse 2s infinite; 
+                                                    @keyframes pulse {
+                                                        0% {
+                                                            transform: scale(1);
+                                                        }
+                                                        50% {
+                                                            transform: scale(1.1);
+                                                        }
+                                                        100% {
+                                                            transform: scale(1);
+                                                        }
+                                                    }">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                <h3 class="job-search-title" style="font-size: 1.25rem;
+                                                    font-weight: 600;
+                                                    color: var(--text-color);
+                                                    margin-bottom: 0.5rem;">Find Jobs</h3>
+                <p class="job-search-description" style="font-size: 0.9rem;
+                                                        color: var(--text-color);
+                                                        opacity: 0.8;
+                                                        margin-bottom: 1rem;">Discover exciting career opportunities</p>
+                
+                <a href="{% url 'job_search' %}" class="job-search-button" style="display: inline-flex;
+                                                            align-items: center;
+                                                            gap: 0.5rem;
+                                                            padding: 0.75rem 1.5rem;
+                                                            background: var(--primary-color);
+                                                            color: white;
+                                                            border-radius: 2rem;
+                                                            text-decoration: none;
+                                                            font-weight: 500;
+                                                            transition: all 0.3s ease;">
+                    <i class="fas fa-search"></i> Explore Jobs
+                </a>
+            </div>
+        </div>
 
         <!-- Main Feed -->
         <div class="feed-section">
@@ -134,18 +185,26 @@
                     <div class="post-action" style="width: 100px; position: relative; top: 10px; left: 10px;cursor: pointer;">
                         <i class="fas fa-image"></i>
                         <label for="postImage" style="cursor: pointer;">Photo</label>
-                        <input type="file" id="postImage" style="visibility: hidden; z-index: -1;">
+                        <input type="file" id="postImage" accept="image/*" style="visibility: hidden; z-index: -1;">
                     </div>
                     <div class="post-action">📅 Event</div>
                     <div class="post-action">📝 Write Article</div>
                     <button class="post-action" id="submitPost" style="width: 120px;">Post</button>
                 </div>
+                <div id="imagePreview" style="display: none; margin-top: 10px;">
+                    <img id="previewImg" style="max-width: 100%; max-height: 300px; border-radius: 8px;">
+                    <button id="removeImage" style="margin-top: 5px; padding: 5px 10px; background: #ff4444; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Remove Image
+                    </button>
+                </div>
             </div>
             
             <!-- Posts Feed -->
-            <div class="posts-feed" id="postsFeed">
-                <div id="loading" style="display: none;">Loading posts...</div>
-                <!-- Posts will be loaded here by JS -->
+            <div id="postsFeed" class="posts-feed">
+                <!-- Posts will be loaded here -->
+            </div>
+            <div id="loading" style="text-align: center; padding: 20px; display: none;">
+                Loading posts...
             </div>
 
             <!-- Trending section -->
@@ -299,6 +358,9 @@
                     <button class="cancel-edit-btn" onclick="cancelEdit(${post.id})">Cancel</button>
                 </div>
             </div>
+            <button class="comment-button" onclick="toggleComments(${post.id})">
+                <i class="fas fa-comment"></i> <span class="comments-count">${post.comments ? post.comments.length : 0}</span>
+            </button>
         `;
         
         return postElement;
