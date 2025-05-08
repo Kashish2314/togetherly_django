@@ -23,6 +23,27 @@ function applySavedTheme() {
     }
 }
 applySavedTheme();
+document.addEventListener('DOMContentLoaded', function() {
+    // This ensures the gallery works even if JavaScript is disabled
+    // For more advanced functionality you could add:
+    // - Dynamic loading of news items
+    // - Touch support for mobile devices
+    // - Event listeners for card clicks
+    
+    // Example of adding a click handler to each card
+    const cards = document.querySelectorAll('.news-card');
+    cards.forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Don't follow link if clicking on the card but not the link
+            if (!e.target.closest('.news-link')) {
+                const link = this.querySelector('.news-link');
+                if (link) {
+                    window.location.href = link.href;
+                }
+            }
+        });
+    });
+});
 
 document.addEventListener('DOMContentLoaded', function() {
     // Add menu icon to navbar

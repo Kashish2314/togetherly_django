@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from users.models import UserProfile
 
 User = get_user_model()
 
@@ -41,6 +44,15 @@ class SkillChallenge(models.Model):
     def get_participants_count(self):
         return self.challengeparticipation_set.count()
 
+@receiver(post_save, sender=SkillChallenge)
+def update_creator_challenges_count(sender, instance, created, **kwargs):
+    if created:
+        try:
+            user_profile = UserProfile.objects.get(user=instance.creator)
+            user_profile.increment_challenges_created()
+        except UserProfile.DoesNotExist:
+            pass
+
 class ChallengeParticipation(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending Review'),
@@ -56,6 +68,15 @@ class ChallengeParticipation(models.Model):
     submitted_at = models.DateTimeField(auto_now_add=True)
     evaluation_score = models.IntegerField(null=True, blank=True)
     feedback = models.TextField(blank=True)
+
+@receiver(post_save, sender=ChallengeParticipation)
+def update_completed_challenges_count(sender, instance, **kwargs):
+    if instance.status == 'completed':
+        try:
+            user_profile = UserProfile.objects.get(user=instance.user)
+            user_profile.increment_challenges_completed()
+        except UserProfile.DoesNotExist:
+            pass
 
 class UserAchievement(models.Model):
     BADGE_TYPES = [

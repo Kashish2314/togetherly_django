@@ -3,7 +3,7 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from users.models import User
+from users.models import User, UserProfile
 from messaging.models import Message, Conversation
 from connections.models import Connection
 from notifications.models import Notification
@@ -13,6 +13,7 @@ from .serializers import (
     ConnectionSerializer, NotificationSerializer, ChallengeSerializer,
     ChallengeParticipantSerializer
 )
+from django.db.models import Q
 
 # Create your views here.
 
@@ -104,11 +105,13 @@ class ChallengeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return SkillChallenge.objects.filter(
-            challengeparticipation__user=self.request.user
-        ).order_by('-created_at')
+            Q(creator=self.request.user) |  # Challenges created by user
+            Q(challengeparticipation__user=self.request.user)  # Challenges user is participating in
+        ).distinct().order_by('-created_at')
 
     def perform_create(self, serializer):
-        serializer.save(creator=self.request.user)
+        challenge = serializer.save(creator=self.request.user)
+        # The signal will handle incrementing challenges_created
 
     @action(detail=True, methods=['post'])
     def join(self, request, pk=None):
@@ -130,6 +133,44 @@ class ChallengeViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         return Response({'status': 'joined challenge'})
+
+    @action(detail=True, methods=['get'])
+    def participants(self, request, pk=None):
+        challenge = self.get_object()
+        if challenge.creator != request.user:
+            return Response(
+                {'error': 'Only challenge creator can view participants'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        participants = ChallengeParticipation.objects.filter(challenge=challenge)
+        serializer = ChallengeParticipantSerializer(participants, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def complete(self, request, pk=None):
+        challenge = self.get_object()
+        try:
+            participation = ChallengeParticipation.objects.get(
+                challenge=challenge,
+                user=request.user
+            )
+            if participation.status != 'accepted':
+                return Response(
+                    {'error': 'Challenge must be accepted before completion'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            participation.status = 'completed'
+            participation.save()
+            # The signal will handle incrementing challenges_completed
+            
+            return Response({'status': 'challenge completed'})
+        except ChallengeParticipation.DoesNotExist:
+            return Response(
+                {'error': 'Not participating in this challenge'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
 class ChallengeParticipantViewSet(viewsets.ModelViewSet):
     serializer_class = ChallengeParticipantSerializer

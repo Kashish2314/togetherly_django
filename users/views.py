@@ -81,13 +81,22 @@ def profile(request):
     # Get post count for the user
     post_count = Post.objects.filter(user=request.user).count()
     
+    # Get connection count
+    connection_count = Connection.objects.filter(
+        Q(sender=request.user, status='accepted') | 
+        Q(receiver=request.user, status='accepted')
+    ).count()
+    
     skills = [s.strip() for s in user_profile.skills.split(',')] if user_profile.skills else []
     
     return render(request, 'users/userprofile.html', {
         'user': request.user,
         'user_profile': user_profile,
         'skills': skills,
-        'post_count': post_count,  # Add post count to context
+        'post_count': post_count,
+        'connection_count': connection_count,
+        'challenges_created': user_profile.challenges_created,
+        'challenges_completed': user_profile.challenges_completed,
     })
 
 @login_required
