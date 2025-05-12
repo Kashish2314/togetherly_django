@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Togetherly</title>
-    <link rel="stylesheet" href="{% static 'users/home.css' %}">
+    <link rel="stylesheet" href="{% static 'users/home.css' %}?v={% now 'U' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=swords" />
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
@@ -75,7 +75,7 @@
         </ul>
     {% endif %}
 
-    <main class="main-content">
+    <main class="main-content" >
         <!-- Left Sidebar -->
         <div class="profile-section">
             <div class="profile-card">
@@ -110,7 +110,7 @@
                 </div>
             </div>
         </div>
-        <div class="job-search-sidebar" style="position: absolute; left: 20rem; bottom: 8rem;z-index: 100; background-color: var(--card-bg); width: 310px; border-radius: 1rem;">
+        <div class="job-search-sidebar" style="position: absolute; left: 23.5rem; bottom: 8rem;z-index: 100; background-color: var(--card-bg); width: 310px; border-radius: 1rem;">
             <div class="job-search-card" style="background: var(--card-bg);
                                                 border-radius: 1rem;
                                                 padding: 1.5rem;
@@ -163,7 +163,7 @@
         </div>
 
         <!-- Main Feed -->
-        <div class="feed-section">
+        <div class="feed-section" >
             <!-- Post Section -->
             <div class="create-post">
                 <input type="hidden" id="createPostUrl" value="{% url 'create_post' %}">
@@ -206,165 +206,36 @@
             <div id="loading" style="text-align: center; padding: 20px; display: none;">
                 Loading posts...
             </div>
-
-            <!-- Trending section -->
-            <div class="trending-section">
-                <h2 class="section-header" style="line-height: 6rem; font-size: 3rem; margin-bottom: 1rem;">Trending News</h2>
-                <div class="rolling-gallery-container">
-                    <div class="rolling-gallery">
-                        <!-- News items will be duplicated for seamless looping -->
-                        <div class="news-card">
-                            <div class="news-content" style="line-height: 2rem;">
-                                <h3 class="news-title">Claude 3 Surpasses Human Performance on Advanced Reasoning Tasks</h3>
-                                <div class="news-meta">
-                                    <i class="fas fa-fire"></i>
-                                    <span>15.2K developers discussing</span>
-                                </div>
-                                <a href="https://neontri.com/blog/claude-ai-breakthrough/#:~:text=After%20testing%20the%20models%20on,material%20to%20verify%20the%20answers." class="news-link">Read more</a>
-                            </div>
-                        </div>
-                        <div class="news-card" style="line-height: 2rem;">
-                            <div class="news-content">
-                                <h3 class="news-title">Google Introduces Next-Gen AI Image Generator</h3>
-                                <div class="news-meta">
-                                    <i class="fas fa-chart-line"></i>
-                                    <span>8.7K shares</span>
-                                </div>
-                                <a href="https://searchengineland.com/google-imagen-3-ai-model-human-subjects-ads-452120" class="news-link">Read more</a>
-                            </div>
-                        </div>
-                        <div class="news-card" style="line-height: 2rem;">
-                            <div class="news-content">
-                                <h3 class="news-title">OpenAI's Latest Innovation in Multimodal Learning</h3>
-                                <div class="news-meta">
-                                    <i class="fas fa-comments"></i>
-                                    <span>12.3K reactions</span>
-                                </div>
-                                <a href="https://medium.com/@ilhnsevval/openais-latest-innovations-multimodal-capabilities-and-assistants-api-901a02cc344f" class="news-link">Read more</a>
-                            </div>
-                        </div>
-                        <div class="news-card" style="line-height: 2rem;">
-                            <div class="news-content">
-                                <h3 class="news-title">AI-Powered Code Generation Transforms Developer Workflow</h3>
-                                <div class="news-meta">
-                                    <i class="fas fa-code"></i>
-                                    <span>6.5K developers implementing</span>
-                                </div>
-                                <a href="https://about.gitlab.com/topics/devops/ai-code-generation-guide/" class="news-link">Read more</a>
-                            </div>
-                        </div>
-                        <div class="news-card" style="line-height: 2rem;">
-                            <div class="news-content">
-                                <h3 class="news-title">CEO of Clearview AI Resigns Amid Controversy</h3>
-                                <div class="news-meta">
-                                    <i class="fas fa-user-lock"></i>
-                                    <span>Faces multiple privacy suits</span>
-                                </div>
-                                <a href="https://techcrunch.com/2025/02/20/ceo-of-clearview-ai-a-controversial-facial-recognition-startup-has-resigned/" class="news-link">Read more</a>
-                            </div>
-                        </div>
-                        <div class="news-card" style="line-height: 2rem;">
-                            <div class="news-content">
-                                <h3 class="news-title">Swedish PM's AI Warning for Europe</h3>
-                                <div class="news-meta">
-                                    <i class="fas fa-globe"></i>
-                                    <span>Urged to ease AI regulations</span>
-                                </div>
-                                <a href="https://timesofindia.indiatimes.com/technology/tech-news/swedish-pm-has-an-ai-warning-for-europe-region-will-actually-become-some-kind-of/articleshow/118424150.cms" class="news-link">Read more</a>
-                            </div>
-                        </div>
-                        <div class="news-card" style="line-height: 2rem;">
-                            <div class="news-content">
-                                <h3 class="news-title">Claude 3 Surpasses Human Performance on Advanced Reasoning Tasks</h3>
-                                <div class="news-meta">
-                                    <i class="fas fa-fire"></i>
-                                    <span>15.2K developers discussing</span>
-                                </div>
-                                <a href="https://neontri.com/blog/claude-ai-breakthrough/#:~:text=After%20testing%20the%20models%20on,material%20to%20verify%20the%20answers." class="news-link">Read more</a>
-                            </div>
-                        </div>
-                        <div class="news-card" style="line-height: 2rem;">
-                            <div class="news-content">
-                                <h3 class="news-title">Google Introduces Next-Gen AI Image Generator</h3>
-                                <div class="news-meta">
-                                    <i class="fas fa-chart-line"></i>
-                                    <span>8.7K shares</span>
-                                </div>
-                                <a href="https://searchengineland.com/google-imagen-3-ai-model-human-subjects-ads-452120" class="news-link">Read more</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
         
+        <div class="news-container" >
+            <!-- Trending News Section -->
+            <h2 class="section-header">Trending Tech News</h2>
+            <div class="rolling-gallery-container">
+                <div id="trendingLoading" class="loading">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">Loading trending news...</p>
+                </div>
+                <div class="rolling-gallery trending" id="trendingGallery"></div>
+            </div>
+            
+            <!-- Divider between sections -->
+            <div class="section-divider"></div>
+            
+            <!-- Breaking News Section -->
+            <h2 class="section-header" style="background: linear-gradient(135deg, #0ea5e9 0%, #4f46e5 100%); -webkit-background-clip: text; background-clip: text;">Breaking News</h2>
+            <div class="rolling-gallery-container">
+                <div id="breakingLoading" class="loading">
+                    <div class="loading-spinner breaking"></div>
+                    <p class="loading-text breaking">Loading breaking news...</p>
+                </div> 
+                <div class="rolling-gallery breaking" id="breakingGallery"></div>
+            </div>
+        </div>
+
     </main>
 
-    <script src="{% static 'users/home.js' %}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const track = document.querySelector('.news-gallery-track');
-            const speedControl = document.getElementById('speedControl');
-            const reverseButton = document.getElementById('reverseDirection');
-            
-            speedControl.addEventListener('input', function() {
-                const speed = 60 - this.value; // Inverse the value for more intuitive control
-                track.style.animationDuration = speed + 's';
-            });
-            
-            reverseButton.addEventListener('click', function() {
-                const currentDirection = track.style.animationDirection;
-                track.style.animationDirection = currentDirection === 'reverse' ? 'normal' : 'reverse';
-            });
-        });
-    function createPostElement(post) {
-        const isCurrentUser = post.user_id === parseInt(document.getElementById('currentUserId').value);
-        const postElement = document.createElement('div');
-        postElement.className = 'post';
-        postElement.id = `post-${post.id}`;
-        
-        postElement.innerHTML = `
-            <div class="post-header">
-                <div class="post-user">
-                    <div class="post-avatar">
-                        <img src="${post.profile_picture_url || 'https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg'}" alt="${post.username}">
-                    </div>
-                    <div class="post-info">
-                        <span class="post-username">${post.username}</span>
-                        <div class="post-timestamp">
-                            <span class="post-date">${new Date(post.timestamp).toLocaleDateString()}</span>
-                            <span class="post-time">${new Date(post.timestamp).toLocaleTimeString()}</span>
-                        </div>
-                    </div>
-                </div>
-                ${isCurrentUser ? `
-                    <div class="post-actions">
-                        <button class="edit-post-btn" onclick="startEditPost(${post.id})">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="delete-post-btn" onclick="deletePost(${post.id})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                ` : ''}
-            </div>
-            <div class="post-content" id="post-content-${post.id}">
-                ${post.content}
-            </div>
-            <div class="post-edit-form" id="post-edit-${post.id}" style="display: none;">
-                <textarea class="edit-content">${post.content}</textarea>
-                <div class="edit-actions">
-                    <button class="save-edit-btn" onclick="saveEdit(${post.id})">Save</button>
-                    <button class="cancel-edit-btn" onclick="cancelEdit(${post.id})">Cancel</button>
-                </div>
-            </div>
-            <button class="comment-button" onclick="toggleComments(${post.id})">
-                <i class="fas fa-comment"></i> <span class="comments-count">${post.comments ? post.comments.length : 0}</span>
-            </button>
-        `;
-        
-        return postElement;
-    }
-    </script>
+
+    <script src="{% static 'users/home.js' %}?v={% now 'U' %}"></script>
 </body>
 </html>

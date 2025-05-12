@@ -23,27 +23,6 @@ function applySavedTheme() {
     }
 }
 applySavedTheme();
-document.addEventListener('DOMContentLoaded', function() {
-    // This ensures the gallery works even if JavaScript is disabled
-    // For more advanced functionality you could add:
-    // - Dynamic loading of news items
-    // - Touch support for mobile devices
-    // - Event listeners for card clicks
-    
-    // Example of adding a click handler to each card
-    const cards = document.querySelectorAll('.news-card');
-    cards.forEach(card => {
-        card.addEventListener('click', function(e) {
-            // Don't follow link if clicking on the card but not the link
-            if (!e.target.closest('.news-link')) {
-                const link = this.querySelector('.news-link');
-                if (link) {
-                    window.location.href = link.href;
-                }
-            }
-        });
-    });
-});
 
 document.addEventListener('DOMContentLoaded', function() {
     // Add menu icon to navbar
@@ -586,3 +565,258 @@ setInterval(updateMood, 5000);
 // Initial mood update on page load
 updateMood();
 
+function createPostElement(post) {
+    const isCurrentUser = post.user_id === parseInt(document.getElementById('currentUserId').value);
+    const postElement = document.createElement('div');
+    postElement.className = 'post';
+    postElement.id = `post-${post.id}`;
+    
+    postElement.innerHTML = `
+        <div class="post-header">
+            <div class="post-user">
+                <div class="post-avatar">
+                    <img src="${post.profile_picture_url || 'https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg'}" alt="${post.username}">
+                </div>
+                <div class="post-info">
+                    <span class="post-username">${post.username}</span>
+                    <div class="post-timestamp">
+                        <span class="post-date">${new Date(post.timestamp).toLocaleDateString()}</span>
+                        <span class="post-time">${new Date(post.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                </div>
+            </div>
+            ${isCurrentUser ? `
+                <div class="post-actions">
+                    <button class="edit-post-btn" onclick="startEditPost(${post.id})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="delete-post-btn" onclick="deletePost(${post.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            ` : ''}
+        </div>
+        <div class="post-content" id="post-content-${post.id}">
+            ${post.content}
+        </div>
+        <div class="post-edit-form" id="post-edit-${post.id}" style="display: none;">
+            <textarea class="edit-content">${post.content}</textarea>
+            <div class="edit-actions">
+                <button class="save-edit-btn" onclick="saveEdit(${post.id})">Save</button>
+                <button class="cancel-edit-btn" onclick="cancelEdit(${post.id})">Cancel</button>
+            </div>
+        </div>
+        <button class="comment-button" onclick="toggleComments(${post.id})">
+            <i class="fas fa-comment"></i> <span class="comments-count">${post.comments ? post.comments.length : 0}</span>
+        </button>
+    `;
+    
+    return postElement;
+}
+
+        
+// ---------------NEWSSSSS -------------------
+// DOM Elements
+const trendingGallery = document.getElementById('trendingGallery');
+const breakingGallery = document.getElementById('breakingGallery');
+const trendingLoading = document.getElementById('trendingLoading');
+const breakingLoading = document.getElementById('breakingLoading');
+
+// Fallback categories
+const TECH_CATEGORIES = ['AI', 'Programming', 'Cybersecurity', 'Blockchain', 'Cloud', 'Startups'];
+const GENERAL_CATEGORIES = ['Politics', 'Business', 'Health', 'Science', 'Sports', 'Entertainment'];
+
+// Initialize the app
+async function newsinit1() {
+    // Load both news sections
+    loadTrendingNews();
+    loadBreakingNews();
+    
+    // Refresh news every hour
+    setInterval(() => {
+        loadTrendingNews();
+        loadBreakingNews();
+    }, 60 * 60 * 1000);
+}
+
+// Load trending tech news
+const TRENDING_API = '/api/trending-news/';
+const BREAKING_API = '/api/breaking-news/';
+
+// Update your load functions
+async function loadTrendingNews() {
+    try {
+        showLoading(true, 'trending');
+        const response = await fetch(TRENDING_API);
+        
+        console.log('Trending News Response:', response); // Debug
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Trending News API Error:', errorData);
+            throw new Error(`API request failed: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        let newsItems = [];
+        
+        if (data.articles && data.articles.length > 0) {
+            newsItems = processNewsData(data.articles, 'tech');
+        } else {
+            newsItems = generateFallbackNews('tech');
+        }
+        
+        renderNewsCards(newsItems, trendingGallery, 'trending');
+        
+    } catch (error) {
+        console.error("Trending news error:", error);
+        const fallbackNews = generateFallbackNews('tech');
+        renderNewsCards(fallbackNews, trendingGallery, 'trending');
+    } finally {
+        showLoading(false, 'trending');
+    }
+}
+
+// Load breaking news
+async function loadBreakingNews() {
+    try {
+        showLoading(true, 'breaking');
+        
+        // Try API first
+        const response = await fetch(BREAKING_API);
+        
+        if (!response.ok) throw new Error('API request failed');
+        
+        const data = await response.json();
+        let newsItems = [];
+        
+        if (data.articles && data.articles.length > 0) {
+            newsItems = processNewsData(data.articles, 'general');
+        } else {
+            newsItems = generateFallbackNews('general');
+        }
+        
+        renderNewsCards(newsItems, breakingGallery, 'breaking');
+        
+    } catch (error) {
+        console.error("Breaking news error:", error);
+        const fallbackNews = generateFallbackNews('general');
+        renderNewsCards(fallbackNews, breakingGallery, 'breaking');
+        
+    } finally {
+        showLoading(false, 'breaking');
+    }
+}
+
+// Process API news data
+function processNewsData(articles, type) {
+    const categories = type === 'tech' ? TECH_CATEGORIES : GENERAL_CATEGORIES;
+    return articles.slice(0, 10).map(article => ({
+        title: article.title || 'No title available',
+        description: article.description || 'Click to read more about this story',
+        url: article.url,
+        imageUrl: article.urlToImage || getRandomImage(type),
+        source: article.source?.name || 'Unknown source',
+        publishedAt: formatDate(article.publishedAt),
+        category: categories[Math.floor(Math.random() * categories.length)]
+    }));
+}
+
+// Generate fallback news data
+function generateFallbackNews(type) {
+    const categories = type === 'tech' ? TECH_CATEGORIES : GENERAL_CATEGORIES;
+    const sources = type === 'tech' 
+        ? ['TechCrunch', 'Wired', 'The Verge', 'MIT Tech Review'] 
+        : ['CNN', 'BBC', 'Reuters', 'AP News'];
+    
+    return Array(10).fill().map((_, i) => ({
+        title: `${categories[i % categories.length]} ${type === 'tech' ? 'Update' : 'News'}: Latest Developments`,
+        description: `Stay updated with the latest ${type === 'tech' ? 'technology trends' : 'news developments'}. Click to read more.`,
+        url: `https://example.com/news/${type}/${i+1}`,
+        imageUrl: getRandomImage(type),
+        source: sources[i % sources.length],
+        publishedAt: formatDate(new Date(Date.now() - Math.random() * 7 * 86400000)), // Random date in last 7 days
+        category: categories[i % categories.length]
+    }));
+}
+
+// Get random image based on news type
+function getRandomImage(type) {
+    const techImages = [
+        'https://source.unsplash.com/random/600x400/?technology',
+        'https://source.unsplash.com/random/600x400/?programming',
+        'https://source.unsplash.com/random/600x400/?computer',
+        'https://source.unsplash.com/random/600x400/?ai',
+        'https://source.unsplash.com/random/600x400/?datacenter'
+    ];
+    
+    const generalImages = [
+        'https://source.unsplash.com/random/600x400/?news',
+        'https://source.unsplash.com/random/600x400/?world',
+        'https://source.unsplash.com/random/600x400/?business',
+        'https://source.unsplash.com/random/600x400/?politics',
+        'https://source.unsplash.com/random/600x400/?health'
+    ];
+    
+    const images = type === 'tech' ? techImages : generalImages;
+    return images[Math.floor(Math.random() * images.length)];
+}
+
+// Format date
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+}
+
+// Show/hide loading state
+function showLoading(show, type) {
+    const loadingEl = type === 'trending' ? trendingLoading : breakingLoading;
+    const galleryEl = type === 'trending' ? trendingGallery : breakingGallery;
+    
+    if (show) {
+        loadingEl.style.display = 'flex';
+        galleryEl.style.display = 'none';
+    } else {
+        loadingEl.style.display = 'none';
+        galleryEl.style.display = 'flex';
+    }
+}
+
+// Render news cards
+function renderNewsCards(newsItems, container, type) {
+    container.innerHTML = '';
+    
+    // Create cards for each news item
+    newsItems.forEach(news => {
+        const newsCard = document.createElement('div');
+        newsCard.className = 'news-card';
+        newsCard.innerHTML = `
+            <div class="news-badge">${news.category}</div>
+            <img src="${news.imageUrl}" alt="${news.title}" class="news-image" onerror="this.src='https://source.unsplash.com/random/600x400/?${type === 'trending' ? 'technology' : 'news'}'">
+            <div class="news-content">
+                <h3 class="news-title">${news.title}</h3>
+                <div class="news-meta">
+                    <i class="fas fa-newspaper"></i>
+                    <span>${news.source} • ${news.publishedAt}</span>
+                </div>
+                <p class="news-description">${news.description}</p>
+                <a href="${news.url}" class="news-link" target="_blank">Read more</a>
+            </div>
+        `;
+        container.appendChild(newsCard);
+    });
+    
+    // Duplicate cards for seamless looping
+    const firstFewCards = Array.from(container.children).slice(0, 5);
+    firstFewCards.forEach(card => {
+        const clone = card.cloneNode(true);
+        container.appendChild(clone);
+    });
+}
+
+// Start the application
+document.addEventListener('DOMContentLoaded', newsinit1);

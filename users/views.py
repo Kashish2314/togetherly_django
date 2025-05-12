@@ -6,6 +6,10 @@ from django.http import JsonResponse, HttpResponseForbidden
 from .models import User, UserProfile, Post, Comment
 from connections.models import Connection
 from django.db.models import Q
+import requests
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
 
 def base(request):
     return render(request, 'users/base.html')
@@ -326,3 +330,18 @@ def delete_comment(request, comment_id):
 @login_required
 def job_search(request):
     return render(request, 'users/job_search.html')
+
+from django.conf import settings
+
+@csrf_exempt
+def get_trending_news(request):
+    url = f'https://newsapi.org/v2/top-headlines?country=us&category=technology&apiKey={settings.NEWS_API_KEY}'
+    response = requests.get(url)
+    return JsonResponse(response.json())
+
+@csrf_exempt
+def get_breaking_news(request):
+    NEWS_API_KEY = '510b7a1e738d421f8a144869d623b462'
+    url = f'https://newsapi.org/v2/top-headlines?country=us&pageSize=10&apiKey={NEWS_API_KEY}'
+    response = requests.get(url)
+    return JsonResponse(response.json())

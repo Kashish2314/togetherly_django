@@ -168,3 +168,5 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10
 }
 
+# settings.py
+NEWS_API_KEY = '510b7a1e738d421f8a144869d623b462'
